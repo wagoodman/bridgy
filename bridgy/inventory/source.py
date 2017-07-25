@@ -4,6 +4,7 @@ from fuzzywuzzy import fuzz
 
 Instance = collections.namedtuple("Instance", "name address")
 
+
 class InventorySource(object):
     __metaclass__ = abc.ABCMeta
 
@@ -23,7 +24,8 @@ class InventorySource(object):
         for host in targets:
             for instance in allInstances:
                 if fuzzy:
-                    score = fuzz.partial_ratio(host.lower(), instance.name.lower())
+                    score = fuzz.partial_ratio(
+                        host.lower(), instance.name.lower())
                     if score > 95 or host.lower() in instance.name.lower():
                         matchedInstances.add(instance)
                 elif partial and host.lower() in instance.name.lower():

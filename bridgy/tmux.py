@@ -4,8 +4,9 @@ from tmuxssh import TmuxSession
 
 from config import Config
 
+
 def run(commands, layout=None):
-    if layout not in Config['tmux']['layout']:
+    if layout and layout not in Config['tmux']['layout']:
         raise RuntimeError("Config does not define layout: %s" % layout)
 
     with TmuxSession('tmux-{}'.format(os.getpid())) as tmux:
@@ -21,7 +22,8 @@ def run(commands, layout=None):
                 # create each pane
                 for idx, item in enumerate(Config['tmux']['layout'][layout]):
 
-                    cmd = shlex.split(item['cmd']) + ['-t', name] + shlex.split(command)
+                    cmd = shlex.split(item['cmd']) + \
+                        ['-t', name] + shlex.split(command)
                     if 'run' in item:
                         cmd += shlex.split(item['run'])
 

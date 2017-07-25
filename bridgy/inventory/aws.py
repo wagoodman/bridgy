@@ -4,6 +4,7 @@ from config import Config
 import boto3
 import placebo
 
+
 class AwsInventory(InventorySource):
 
     @property
@@ -11,12 +12,13 @@ class AwsInventory(InventorySource):
 
     def __init__(self):
         session = boto3.Session(
-            aws_access_key_id = Config['aws']['access_key_id'],
-            aws_secret_access_key = Config['aws']['secret_access_key'],
-            aws_session_token = Config['aws']['session_token'],
-            region_name = Config['aws']['region']
+            aws_access_key_id=Config['aws']['access_key_id'],
+            aws_secret_access_key=Config['aws']['secret_access_key'],
+            aws_session_token=Config['aws']['session_token'],
+            region_name=Config['aws']['region']
         )
-        self.pill = placebo.attach(session, data_path=Config.inventoryDir(self.name))
+        self.pill = placebo.attach(
+            session, data_path=Config.inventoryDir(self.name))
 
         self.client = session.client('ec2')
 
@@ -53,7 +55,7 @@ class AwsInventory(InventorySource):
 
                 # take note of this instance
                 if name != None and address != None:
-                    instances.append( Instance(name, address) )
+                    instances.append(Instance(name, address))
 
         return instances
 

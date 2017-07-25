@@ -56,12 +56,13 @@ class ConfigDef(type):
     __path = "~/.bridgy/config.yml"
     __inventory = "~/.bridgy/inventory"
     __conf = None
-    inventorySources = ['gcp','aws','csv']
+    inventorySources = ['gcp', 'aws', 'csv']
 
     @classmethod
     def read(cls):
         # ensure yaml uses a defaultdict(str)
-        yaml.add_representer(collections.defaultdict, Representer.represent_str)
+        yaml.add_representer(collections.defaultdict,
+                             Representer.represent_str)
         with open(os.path.expanduser(ConfigDef.__path), 'r') as fh:
             ConfigDef.__conf = yaml.load(fh)
 
@@ -91,13 +92,14 @@ class ConfigDef(type):
     @classmethod
     def inventoryDir(cls, source):
         if source not in Config.inventorySources:
-            raise RuntimeError("Unexpected inventory source: %s" % repr(source))
+            raise RuntimeError(
+                "Unexpected inventory source: %s" % repr(source))
         return os.path.join(os.path.expanduser(ConfigDef.__inventory),
                             source)
 
     # TODO
     @classmethod
-    def verify(cls):pass
+    def verify(cls): pass
 
     @classmethod
     def __iter__(cls):
@@ -110,6 +112,7 @@ class ConfigDef(type):
     @classmethod
     def __repr__(cls):
         return repr(ConfigDef.__conf)
+
 
 class Config(object):
     __metaclass__ = ConfigDef

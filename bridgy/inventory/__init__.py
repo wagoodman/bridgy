@@ -11,6 +11,7 @@ SOURCES = {
     'csv': CsvInventory,
 }
 
+
 def getInventory():
     source = Config['inventory']['source']
     return SOURCES[source]()

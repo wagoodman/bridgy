@@ -30,7 +30,9 @@ Configuration Options are in ~/.bridgy/config.yml
 """
 from docopt import docopt
 
-import sys, os, collections
+import sys
+import os
+import collections
 import logging
 import inquirer
 
@@ -78,11 +80,11 @@ def promptTargets(targets):
         displayInst[display] = instance
 
     questions = [
-      inquirer.Checkbox('instance',
-                    message="What instances would you like to ssh into? (space to multi-select, enter to finish)",
-                    choices=displayInst.keys() + ['all'],
-                    #default='all'
-                ),
+        inquirer.Checkbox('instance',
+                          message="What instances would you like to ssh into? (space to multi-select, enter to finish)",
+                          choices=displayInst.keys() + ['all'],
+                          # default='all'
+                          ),
     ]
 
     answers = inquirer.prompt(questions)
@@ -101,7 +103,8 @@ def ssh_handler(args):
         template = 'ssh '
         if 'bastion' in Config:
             # old way: via netcat
-            template += '-o ProxyCommand=\'ssh %s -W %%h:%%p %s@%s\' ' % (Config['bastion']['template'], Config['bastion']['user'], Config['bastion']['address'])
+            template += '-o ProxyCommand=\'ssh %s -W %%h:%%p %s@%s\' ' % (
+                Config['bastion']['template'], Config['bastion']['user'], Config['bastion']['address'])
             # new way: ProxyJump (not working)
             # template += '-o ProxyJump=\'%s@%s:22\' ' % (Config['bastion']['user'], Config['bastion']['address'])
         if 'ssh' in Config and 'template' in Config['ssh']:
@@ -114,7 +117,8 @@ def ssh_handler(args):
         commands = collections.OrderedDict()
         for idx, instance in enumerate(targets):
             name = '%s-%d' % (instance.name, idx)
-            commands[name] = template.format("%s@%s"%(Config['ssh']['user'], instance.address))
+            commands[name] = template.format("%s@%s" % (
+                Config['ssh']['user'], instance.address))
 
         layout = None
         if args['--layout']:
@@ -124,20 +128,26 @@ def ssh_handler(args):
     except EnvironmentError:
         print('You need to install tmux before using this script.')
 
+
 def mount_handler(args):
     raise RuntimeError("Unimplemented")
+
 
 def unmount_handler(args):
     raise RuntimeError("Unimplemented")
 
+
 def update_handler(args):
     raise RuntimeError("Unimplemented")
+
 
 def tunnel_handler(args):
     raise RuntimeError("Unimplemented")
 
+
 def main():
-    if os.geteuid() == 0: sys.exit("\nDo not run this as root\n")
+    if os.geteuid() == 0:
+        sys.exit("\nDo not run this as root\n")
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     version = 'bridgy %s' % __version__
 
@@ -162,6 +172,7 @@ def main():
     for opt, handler in opts.items():
         if args[opt]:
             handler(args)
+
 
 if __name__ == '__main__':
     main()
