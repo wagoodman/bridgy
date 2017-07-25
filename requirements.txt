@@ -1,0 +1,8 @@
+PyYAML
+docopt
+inquirer
+tmuxssh
+fuzzywuzzy
+boto3
+placebo
+python-Levenshtein
