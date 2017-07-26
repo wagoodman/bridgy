@@ -6,8 +6,9 @@ by tmux.
 Usage:
   bridgy ssh [-teau] [-l LAYOUT] <host>...
   bridgy tunnel <host>
-  bridgy mount <host>:<dir> <dir>
-  bridgy unmount <host>
+  bridgy list-mounts
+  bridgy mount <host>:<remotedir>
+  bridgy unmount (-a | <host>...)
   bridgy update
   bridgy (-h | --help)
   bridgy --version
@@ -15,6 +16,8 @@ Usage:
 Sub-commands:
   tunnel        open a tunnel to the selected ec2 instance
   mount         use sshfs to mount a remote directory to an empty local directory
+  umount        unmount one or more host sshfs mounts
+  list-mounts   show all sshfs mounts
   update        pull the latest instance inventory from aws
 
 Options:
@@ -39,6 +42,8 @@ import inquirer
 from inventory import getInventory
 from config import Config
 import tmux
+import ssh
+import sshfs
 
 __version__ = '0.0.1'
 
@@ -70,28 +75,43 @@ __version__ = '0.0.1'
 #   - [ ] csv
 #
 
-def promptTargets(targets):
+def promptTargets(targets, multiple=True):
     inventory = getInventory()
     instances = inventory.search(targets)
+
+    if len(instances) == 0:
+        logging.getLogger().error("Could not find matching host(s) for %s" % repr(targets))
+        sys.exit(1)
 
     displayInst = collections.OrderedDict()
     for instance in instances:
         display = "%-35s (%s)" % instance
         displayInst[display] = instance
 
-    questions = [
-        inquirer.Checkbox('instance',
-                          message="What instances would you like to ssh into? (space to multi-select, enter to finish)",
-                          choices=displayInst.keys() + ['all'],
-                          # default='all'
-                          ),
-    ]
+
+    questions = []
+
+    if multiple:
+        q = inquirer.Checkbox('instance',
+                              message="What instances would you like to ssh into? (space to multi-select, enter to finish)",
+                              choices=displayInst.keys() + ['all'],
+                              # default='all'
+                              )
+        questions.append(q)
+    else:
+        q = inquirer.List('instance',
+                           message="What instance would you like to ssh into? (enter to select)",
+                           choices=displayInst.keys(),
+                           )
+        questions.append(q)
 
     answers = inquirer.prompt(questions)
     if 'all' in answers["instance"]:
         selectedHosts = instances
     else:
         selectedHosts = []
+        if not multiple:
+            answers["instance"] = [answers["instance"]]
         for answer in answers["instance"]:
             selectedHosts.append(displayInst[answer])
 
@@ -99,43 +119,44 @@ def promptTargets(targets):
 
 
 def ssh_handler(args):
+    targets = promptTargets(args['<host>'])
+
+    commands = collections.OrderedDict()
+    for idx, instance in enumerate(targets):
+        name = '{}-{}'.format(instance.name, idx)
+        commands[name] = ssh.SshCommand(instance)
+
+    layout = None
+    if args['--layout']:
+        layout = args['--layout']
+
     try:
-        template = 'ssh '
-        if 'bastion' in Config:
-            # old way: via netcat
-            template += '-o ProxyCommand=\'ssh %s -W %%h:%%p %s@%s\' ' % (
-                Config['bastion']['template'], Config['bastion']['user'], Config['bastion']['address'])
-            # new way: ProxyJump (not working)
-            # template += '-o ProxyJump=\'%s@%s:22\' ' % (Config['bastion']['user'], Config['bastion']['address'])
-        if 'ssh' in Config and 'template' in Config['ssh']:
-            template += "%s " % Config['ssh']['template']
-        template += ' {} '
-
-        desiredTargets = (h for h in args['<host>'])
-        targets = promptTargets(desiredTargets)
-
-        commands = collections.OrderedDict()
-        for idx, instance in enumerate(targets):
-            name = '%s-%d' % (instance.name, idx)
-            commands[name] = template.format("%s@%s" % (
-                Config['ssh']['user'], instance.address))
-
-        layout = None
-        if args['--layout']:
-            layout = args['--layout']
-
         tmux.run(commands, layout)
     except EnvironmentError:
-        print('You need to install tmux before using this script.')
+        print('Tmux not installed.')
 
 
 def mount_handler(args):
-    raise RuntimeError("Unimplemented")
+    desiredTargets, remotedir = args['<host>:<remotedir>'].split(':')
+    targets = promptTargets(desiredTargets, multiple=False)
 
+    for idx, instance in enumerate(targets):
+        sshfs.mount(instance,
+                    remotedir)
+
+def list_mounts_handler(args):
+    sshfs.list()
 
 def unmount_handler(args):
-    raise RuntimeError("Unimplemented")
+    if args['-a']:
+        sshfs.umountAll()
+    else:
+        # TODO: only give options for mounts that exist
+        desiredTargets = args['<host>']
+        targets = promptTargets(desiredTargets)
 
+        for idx, instance in enumerate(targets):
+            sshfs.umount(instance=instance)
 
 def update_handler(args):
     raise RuntimeError("Unimplemented")
@@ -164,6 +185,7 @@ def main():
     opts = {
         'ssh': ssh_handler,
         'mount': mount_handler,
+        'list-mounts': list_mounts_handler,
         'unmount': unmount_handler,
         'update': update_handler,
         'tunnel': tunnel_handler,

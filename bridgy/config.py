@@ -55,6 +55,7 @@ tmux:
 class ConfigDef(type):
     __path = "~/.bridgy/config.yml"
     __inventory = "~/.bridgy/inventory"
+    __mount = "~/.bridgy/mounts"
     __conf = None
     inventorySources = ['gcp', 'aws', 'csv']
 
@@ -89,13 +90,21 @@ class ConfigDef(type):
             if not os.path.exists(sourcePath):
                 os.mkdir(sourcePath)
 
-    @classmethod
+        mountPath = os.path.expanduser(ConfigDef.__mount)
+        if not os.path.exists(mountPath):
+            os.mkdir(mountPath)
+
+
     def inventoryDir(cls, source):
         if source not in Config.inventorySources:
             raise RuntimeError(
                 "Unexpected inventory source: %s" % repr(source))
         return os.path.join(os.path.expanduser(ConfigDef.__inventory),
                             source)
+
+    @property
+    def mountRootDir(cls):
+        return os.path.expanduser(ConfigDef.__mount)
 
     # TODO
     @classmethod
