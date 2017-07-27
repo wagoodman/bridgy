@@ -20,7 +20,7 @@ def options():
 def SshCommand(instance):
 
     cmd = '{app} {options} {user}@{host}'
-    return cmd.format(app='sshfs',
+    return cmd.format(app='ssh',
                       user=Config['ssh']['user'],
                       host=instance.address,
                       options=options() )

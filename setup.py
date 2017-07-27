@@ -1,4 +1,3 @@
-from __future__ import print_function
 from setuptools import setup
 
 with open('requirements.txt') as f:

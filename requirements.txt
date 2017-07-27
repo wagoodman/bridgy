@@ -6,3 +6,4 @@ fuzzywuzzy
 boto3
 placebo
 python-Levenshtein
+coloredlogs

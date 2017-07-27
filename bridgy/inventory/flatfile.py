@@ -17,13 +17,12 @@ class CsvInventory(InventorySource):
     def update(self): pass
 
     def instances(self, stub=True):
-        instances = []
+        instances = set()
         with open(self.csvPath, 'rb') as csvfile:
             fields = [f.strip() for f in Config['csv']['fields'].split(",")]
             reader = csv.DictReader(
                 csvfile, fieldnames=fields, delimiter=Config['csv']['delimiter'].strip() or ',')
             for row in reader:
-                instances.append(
-                    Instance(row['name'].strip(), row['address'].strip()))
+                instances.add(Instance(row['name'].strip(), row['address'].strip()))
 
-        return instances
+        return list(instances)

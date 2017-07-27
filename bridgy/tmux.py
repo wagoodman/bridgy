@@ -5,7 +5,7 @@ from tmuxssh import TmuxSession
 from config import Config
 
 
-def run(commands, layout=None):
+def run(commands, inWindows=False, layout=None):
     if layout and layout not in Config['tmux']['layout']:
         raise RuntimeError("Config does not define layout: %s" % layout)
 
@@ -38,10 +38,17 @@ def run(commands, layout=None):
         # open one terminal
         else:
             for name, command in commands.items():
-                tmux.split_window(command)
+                if inWindows:
+                    # new window for all layout panes running the same cmd
+                    cmd = ['new-window', '-n', name] + shlex.split(command)
+                    tmux.tmux(*cmd)
+                else:
+                    tmux.split_window(command)
+
                 tmux.select_layout('tiled')
 
-                # this get's rid of the local
+            # this get's rid of the local
+            if not inWindows:
                 tmux.kill_pane(0)
 
         tmux.attach()
