@@ -30,6 +30,16 @@ Options:
 
 Configuration Options are in ~/.bridgy/config.yml
 """
+
+# Add future options:
+#   bridgy scp [-r] <host>:<remotedir> <localdir>
+#   bridgy tunnel <host>
+#
+# - [ ] open ssh tunnel for remote debuggers
+#          concept: ssh -L 8080:web-server:80 -L 8443:web-server:443 bastion-host -N
+#             then: curl https://localhost:8443/secure.txt
+#           source: https://solitum.net/an-illustrated-guide-to-ssh-tunnels/
+#
 from docopt import docopt
 
 import sys
@@ -46,39 +56,6 @@ import ssh
 import sshfs
 
 __version__ = '0.0.1'
-
-
-# Just get me to my ec2 box with a fuzy search. Multiple matches? I probably
-# wanted to get into all of them in a tmux session anyway.
-#
-# - [x] fuzzy search ec2 instances to IP
-# - [x] prompt for selecting target (matched) hosts
-# - [x] multi-select from matche host options
-# - [x] open multiple ec2 ssh connections via tmux (splits or tabs)
-# - [x] configure tmux layouts for one or more ec2 connections
-# - [ ] open ssh tunnel for remote debuggers
-#          concept: ssh -L 8080:web-server:80 -L 8443:web-server:443 bastion-host -N
-#             then: curl https://localhost:8443/secure.txt
-#           source: https://solitum.net/an-illustrated-guide-to-ssh-tunnels/
-# - [x] seamless bastion hopping (via configuration)
-# - [ ] push / pull files to and from instances (ansible? scp?)
-# - [x] setup sshfs mount to a remote dir
-#          concept: sshfs -o ProxyCommand='ssh -W %h:%p ubuntu@zest' ubuntu@devbox:/excella ./tmp/
-# - [x] templating configurations for logging into systems and running commands
-#          question: for immediate returns is there a way to not exit the tmux pane immediately?
-#
-# General todo:
-# - [ ] make osx friendly
-# - [x] abstract out inventory backends"
-#   - [x] aws
-#   - [ ] google cloud
-#   - [ ] ansible inventory
-#   - [x] csv
-#
-# Add future options:
-#   bridgy scp [-r] <host>:<remotedir> <localdir>
-#   bridgy tunnel <host>
-#
 
 logger = logging.getLogger()
 
