@@ -1,24 +1,21 @@
 from inventory.source import InventorySource, Instance
-from config import Config
 
 import boto3
 import placebo
-
 
 class AwsInventory(InventorySource):
 
     @property
     def name(self): return 'aws'
 
-    def __init__(self):
+    def __init__(self, access_key_id, secret_access_key, session_token, region):
         session = boto3.Session(
-            aws_access_key_id=Config['aws']['access_key_id'],
-            aws_secret_access_key=Config['aws']['secret_access_key'],
-            aws_session_token=Config['aws']['session_token'],
-            region_name=Config['aws']['region']
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=secret_access_key,
+            aws_session_token=session_token,
+            region_name=region
         )
-        self.pill = placebo.attach(
-            session, data_path=Config.inventoryDir(self.name))
+        self.pill = placebo.attach(session, data_path=Config.inventoryDir(self.name))
 
         self.client = session.client('ec2')
 

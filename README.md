@@ -75,7 +75,7 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 
 Sub-commands:
   mount         use sshfs to mount a remote directory to an empty local directory
-  umount        unmount one or more host sshfs mounts
+  unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
   update        pull the latest instance inventory from aws
 

@@ -1,7 +1,9 @@
+from setuptools import find_packages
 from setuptools import setup
+from glob import glob
 
-with open('requirements.txt') as f:
-    required_packages = f.read().splitlines()
+# with open('requirements.txt') as f:
+#     required_packages = f.read().splitlines()
 
 setup(
     name='bridgy',
@@ -9,9 +11,11 @@ setup(
     url='https://github.com/wagoodman/bridgy',
     license='MIT',
     author='William Alex Goodman',
-    install_requires=required_packages,
     description='Tool for combining aws cli + tmux + sshfs',
-    packages=['bridgy'],
+    #install_requires=required_packages,
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
     platforms='linux',
     classifiers = [

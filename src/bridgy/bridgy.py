@@ -14,7 +14,7 @@ Usage:
 
 Sub-commands:
   mount         use sshfs to mount a remote directory to an empty local directory
-  umount        unmount one or more host sshfs mounts
+  unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
   update        pull the latest instance inventory from aws
 
@@ -34,6 +34,7 @@ Configuration Options are in ~/.bridgy/config.yml
 # Add future options:
 #   bridgy scp [-r] <host>:<remotedir> <localdir>
 #   bridgy tunnel <host>
+#   bridgy list-boxes         just show the inventory
 #
 # - [ ] open ssh tunnel for remote debuggers
 #          concept: ssh -L 8080:web-server:80 -L 8443:web-server:443 bastion-host -N
@@ -49,26 +50,21 @@ import logging
 import inquirer
 import coloredlogs
 
-from inventory import getInventory
-from config import Config
+from command import Ssh, Sshfs
+import inventory
+import config
 import tmux
-import ssh
-import sshfs
 
 __version__ = '0.0.1'
 
 logger = logging.getLogger()
-
-def getInstances(targets):
-    inventory = getInventory()
-    return inventory.search(targets)
 
 def promptTargets(question, targets=None, instances=None, multiple=True):
     if targets == None and instances == None or targets != None and instances != None:
         raise RuntimeError("Provide exactly one of either 'targets' or 'instances'")
 
     if targets:
-        instances = getInstances(targets)
+        instances = inventory.search(CONFIG, targets)
 
     if len(instances) == 0:
         return []
@@ -80,7 +76,6 @@ def promptTargets(question, targets=None, instances=None, multiple=True):
     for instance in instances:
         display = "%-35s (%s)" % instance
         displayInst[display] = instance
-
 
     questions = []
 
@@ -110,82 +105,92 @@ def promptTargets(question, targets=None, instances=None, multiple=True):
     return selectedHosts
 
 
-def ssh_handler(args):
+def ssh_handler():
     question = "What instances would you like to ssh into?"
-    targets = promptTargets(question, targets=args['<host>'])
+    targets = promptTargets(question, targets=ARGS['<host>'])
 
     commands = collections.OrderedDict()
     for idx, instance in enumerate(targets):
         name = '{}-{}'.format(instance.name, idx)
-        commands[name] = ssh.SshCommand(instance)
+        commands[name] = Ssh(CONFIG, instance).command
 
     layout = None
-    if args['--layout']:
-        layout = args['--layout']
+    if ARGS['--layout']:
+        layout = ARGS['--layout']
 
     try:
-        tmux.run(commands, args['-w'], layout)
+        tmux.run(commands, ARGS['-w'], layout)
     except EnvironmentError:
         logger.error('Tmux not installed.')
+        sys.exit(1)
 
 
-def mount_handler(args):
-    fields = args['<host>:<remotedir>'].split(':')
+def mount_handler():
+    fields = ARGS['<host>:<remotedir>'].split(':')
+
     if len(fields) != 2:
-        raise RuntimeError("Requires exactly 2 arguments: host:remotedir")
+        logger.error("Requires exactly 2 arguments: host:remotedir")
+        sys.exit(1)
 
     desiredTarget, remotedir = fields
-    instances = getInstances([desiredTarget])
-    mountedTargets = [instance for instance in instances if sshfs.isMounted(instance)]
-    unmountedTargets = set(instances) - set(mountedTargets)
+    instances = inventory.search(CONFIG, [desiredTarget])
+    sshfsObjs = [Sshfs(CONFIG, instance, remotedir) for instance in instances]
+    unmountedTargets = [obj.instance for obj in sshfsObjs if not obj.is_mounted]
+
     question = "What instances would you like to have mounted?"
-    targets = promptTargets(question, instances=unmountedTargets, multiple=False)
+    targetInstances = promptTargets(question, instances=unmountedTargets, multiple=False)
 
-    if len(targets) > 0:
-        for idx, instance in enumerate(targets):
-            if sshfs.mount(instance, remotedir):
-                logger.info("Mounted %s at %s" % (instance.name, remotedir))
-            else:
-                logger.info("Unable to mount %s" % instance.name)
-    else:
+    if len(targetInstances) == 0:
         logger.info("No matching instances found")
+        sys.exit(1)
+
+    for sshfsObj in sshfsObjs:
+        if sshfsObj.instance in targetInstances:
+            if sshfsObj.mount():
+                logger.info("Mounted %s at %s" % (sshfsObj.instance.name, remotedir))
+            else:
+                logger.error("Unable to mount %s" % sshfsObj.instance.name)
 
 
-def list_mounts_handler(args):
-    for mountpoint in sshfs.getMounts():
+def list_mounts_handler():
+    for mountpoint in Sshfs.mounts(CONFIG):
         logger.info(mountpoint)
 
-def unmount_handler(args):
+def unmount_handler():
 
     question = "What instances would you like to have unmounted?"
 
-    if args['-a']:
-        instances = getInventory().instances()
-        mountedTargets = [instance for instance in instances if sshfs.isMounted(instance)]
-        targets = mountedTargets
+    if ARGS['-a']:
+        instances = inventory.instances(CONFIG)
+        sshfsObjs = [Sshfs(CONFIG, instance) for instance in instances]
+        mountedTargets = [obj.instance for obj in sshfsObjs if obj.is_mounted]
+        targetInstances = mountedTargets
     else:
-        desiredTargets = args['<host>']
-        instances = getInstances(desiredTargets)
-        mountedTargets = [instance for instance in instances if sshfs.isMounted(instance)]
-        targets = promptTargets(question, instances=mountedTargets, multiple=False)
+        desiredTargets = ARGS['<host>']
+        instances = inventory.search(CONFIG, desiredTargets)
+        sshfsObjs = [Sshfs(CONFIG, instance) for instance in instances]
+        mountedTargets = [obj.instance for obj in sshfsObjs if obj.is_mounted]
+        targetInstances = promptTargets(question, instances=mountedTargets, multiple=False)
 
-    if len(targets) > 0:
-        for idx, instance in enumerate(targets):
-            if sshfs.umount(instance=instance):
-                logger.info("Unmounted %s" % instance.name)
-            else:
-                logger.info("Unable to unmount %s" % instance.name)
-    else:
+    if len(targetInstances) == 0:
         logger.info("No matching mounts found")
+        sys.exit(1)
 
+    for sshfsObj in sshfsObjs:
+        if sshfsObj.instance in targetInstances:
+            if sshfsObj.unmount():
+                logger.info("Unmounted %s" % sshfsObj.instance.name)
+            else:
+                logger.error("Unable to unmount %s" % sshfsObj.instance.name)
 
-def update_handler(args):
+def update_handler():
     raise RuntimeError("Unimplemented")
-    inventory = getInventory()
+    inventory = inventory(CONFIG)
     inventory.update()
 
 
 def main():
+    global CONFIG, ARGS
     coloredlogs.install(fmt='%(message)s')
 
     if os.geteuid() == 0:
@@ -194,15 +199,16 @@ def main():
 
     version = 'bridgy %s' % __version__
 
-    args = docopt(__doc__, version=version)
+    ARGS = docopt(__doc__, version=version)
 
-    if args['--version']:
+    if ARGS['--version']:
         logger.info(version)
         sys.exit(0)
 
-    Config.create()
-    Config.read()
-    Config.verify()
+    CONFIG = config.Config()
+    CONFIG.create()
+    CONFIG.read()
+    CONFIG.verify()
 
     opts = {
         'ssh': ssh_handler,
@@ -213,8 +219,8 @@ def main():
     }
 
     for opt, handler in opts.items():
-        if args[opt]:
-            handler(args)
+        if ARGS[opt]:
+            handler()
 
 
 if __name__ == '__main__':

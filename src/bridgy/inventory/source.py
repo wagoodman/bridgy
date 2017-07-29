@@ -4,9 +4,11 @@ from fuzzywuzzy import fuzz
 
 Instance = collections.namedtuple("Instance", "name address")
 
-
 class InventorySource(object):
     __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, config): pass
 
     @abc.abstractproperty
     def name(self): pass

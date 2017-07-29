@@ -51,77 +51,65 @@ tmux:
 """
 
 
-# closest to a singleton config that acts like a dict
-class ConfigDef(type):
+class Config(object):
     __path = "~/.bridgy/config.yml"
     __inventory = "~/.bridgy/inventory"
     __mount = "~/.bridgy/mounts"
     __conf = None
     inventorySources = ['gcp', 'aws', 'csv']
 
-    @classmethod
-    def read(cls):
+    def read(self):
         # ensure yaml uses a defaultdict(str)
         yaml.add_representer(collections.defaultdict,
                              Representer.represent_str)
-        with open(os.path.expanduser(ConfigDef.__path), 'r') as fh:
-            ConfigDef.__conf = yaml.load(fh)
+        with open(os.path.expanduser(self.__path), 'r') as fh:
+            self.__conf = yaml.load(fh)
 
-    @classmethod
-    def create(cls):
-        configFile = os.path.expanduser(ConfigDef.__path)
+    def create(self):
+        configFile = os.path.expanduser(self.__path)
         if not os.path.exists(configFile):
-            logging.getLogger().info("Creating %s" % ConfigDef.__path)
+            logging.getLogger().info("Creating %s" % self.__path)
             parentDir = os.path.dirname(configFile)
             if not os.path.exists(parentDir):
                 os.mkdir(parentDir)
             with open(configFile, 'w') as fh:
                 fh.write(CONFIG_TEMPLATE)
 
-        inventoryCache = os.path.expanduser(ConfigDef.__inventory)
+        inventoryCache = os.path.expanduser(self.__inventory)
         if not os.path.exists(inventoryCache):
             parentDir = os.path.dirname(inventoryCache)
             if not os.path.exists(parentDir):
                 os.mkdir(parentDir)
             os.mkdir(inventoryCache)
 
-        for source in Config.inventorySources:
+        for source in self.inventorySources:
             sourcePath = os.path.join(inventoryCache, source)
             if not os.path.exists(sourcePath):
                 os.mkdir(sourcePath)
 
-        mountPath = os.path.expanduser(ConfigDef.__mount)
+        mountPath = os.path.expanduser(self.__mount)
         if not os.path.exists(mountPath):
             os.mkdir(mountPath)
 
-
-    def inventoryDir(cls, source):
-        if source not in Config.inventorySources:
+    def inventoryDir(self, source):
+        if source not in self.inventorySources:
             raise RuntimeError(
                 "Unexpected inventory source: %s" % repr(source))
-        return os.path.join(os.path.expanduser(ConfigDef.__inventory),
+        return os.path.join(os.path.expanduser(self.__inventory),
                             source)
 
     @property
-    def mountRootDir(cls):
-        return os.path.expanduser(ConfigDef.__mount)
+    def mountRootDir(self):
+        return os.path.expanduser(self.__mount)
 
     # TODO
-    @classmethod
-    def verify(cls): pass
+    def verify(self): pass
 
-    @classmethod
-    def __iter__(cls):
-        return iter(ConfigDef.__conf)
+    def __iter__(self):
+        return iter(self.__conf)
 
-    @classmethod
-    def __getitem__(cls, key):
-        return ConfigDef.__conf[key]
+    def __getitem__(self, key):
+        return self.__conf[key]
 
-    @classmethod
-    def __repr__(cls):
-        return repr(ConfigDef.__conf)
-
-
-class Config(object):
-    __metaclass__ = ConfigDef
+    def __repr__(self):
+        return repr(self.__conf)
