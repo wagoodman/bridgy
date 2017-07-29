@@ -1,7 +1,4 @@
-import logging
 import abc
-
-logger = logging.getLogger(__name__)
 
 class BaseCommand:
     __metaclass__ = abc.ABCMeta

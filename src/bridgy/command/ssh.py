@@ -1,7 +1,4 @@
 import base
-import logging
-
-logger = logging.getLogger(__name__)
 
 class Ssh(base.BaseCommand):
     @property
