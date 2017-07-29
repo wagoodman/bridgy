@@ -1,50 +1,11 @@
 import os
-import abc
 import sys
-import posix
-import getpass
 import logging
+import base
 
 logger = logging.getLogger(__name__)
 
-
-class BaseCommand:
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, config, instance):
-        self.config = config
-        self.instance = instance
-
-    @property
-    def options(self):
-        bastion = ''
-        template = ''
-
-        if 'bastion' in self.config:
-            bastion = '-o ProxyCommand=\'ssh %s -W %%h:%%p %s@%s\' ' % (
-                                            self.config['bastion']['template'],
-                                            self.config['bastion']['user'],
-                                            self.config['bastion']['address'])
-
-        if 'ssh' in self.config and 'template' in self.config['ssh']:
-            template = self.config['ssh']['template']
-
-        return '{} {}'.format(bastion, template)
-
-    @abc.abstractproperty
-    def command(self): pass
-
-
-class Ssh(BaseCommand):
-    @property
-    def command(self):
-        cmd = '{app} {options} {user}@{host}'
-        return cmd.format(app='ssh',
-                          user=self.config['ssh']['user'],
-                          host=self.instance.address,
-                          options=self.options )
-
-class Sshfs(BaseCommand):
+class Sshfs(base.BaseCommand):
     def __init__(self, config, instance, remotedir=None):
         super(self.__class__, self).__init__(config, instance)
         self.remotedir = remotedir
