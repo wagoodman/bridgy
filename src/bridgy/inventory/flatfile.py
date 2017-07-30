@@ -1,4 +1,4 @@
-from inventory.source import InventorySource, Instance
+from source import InventorySource, Instance
 
 import os
 import csv

@@ -27,7 +27,7 @@ aws:
 # define ssh behavior and preferences
 ssh:
   user: ubuntu
-  template: -C -o ServerAliveInterval=255
+  options: -C -o ServerAliveInterval=255
   command: sudo -i su - another_user -s /bin/bash
 
 # if you need to connect to aws hosts via a bastion, then
@@ -35,7 +35,7 @@ ssh:
 bastion:
   user: ubuntu
   address: zest
-  template: -C -o ServerAliveInterval=255
+  options: -C -o ServerAliveInterval=255
 
 # define tmux layouts and (optional) canned commands
 tmux:
@@ -99,7 +99,7 @@ class Config(object):
                             source)
 
     @property
-    def mountRootDir(self):
+    def mount_root_dir(self):
         return os.path.expanduser(self.__mount)
 
     # TODO

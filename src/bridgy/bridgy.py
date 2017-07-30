@@ -153,7 +153,7 @@ def mount_handler():
 
 
 def list_mounts_handler():
-    for mountpoint in Sshfs.mounts(CONFIG):
+    for mountpoint in Sshfs.mounts(CONFIG.mount_root_dir):
         logger.info(mountpoint)
 
 def unmount_handler():

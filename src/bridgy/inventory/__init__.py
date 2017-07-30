@@ -1,11 +1,9 @@
 import os
 
-from inventory.aws import AwsInventory
-# from inventory.gcp import GcpInventory
-from inventory.flatfile import CsvInventory
-from inventory.source import Instance
-
-# TODO: register meta classes
+from source import Instance
+from aws import AwsInventory
+# from gcp import GcpInventory
+from flatfile import CsvInventory
 
 SOURCES = {
     'aws': AwsInventory,
@@ -15,6 +13,7 @@ SOURCES = {
 
 
 def inventory(config):
+
     source = config['inventory']['source']
     srcCfg = config[source]
     if source == 'aws':

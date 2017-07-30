@@ -12,29 +12,27 @@ class Sshfs(base.BaseCommand):
 
     @property
     def command(self):
-        cmd = '{app} {options} {user}@{host}:{remotedir} {mountpoint}'
-        return cmd.format(app='sshfs',
-                          user=self.config['ssh']['user'],
-                          host=self.instance.address,
+        cmd = 'sshfs {options} {destination}:{remotedir} {mountpoint}'
+        return cmd.format(destination=self.destination,
                           remotedir=self.remotedir,
                           mountpoint=self.mountpoint,
                           options=self.options )
 
     @classmethod
-    def mounts(cls, config):
+    def mounts(cls, mount_root_dir):
         lines = [line.strip("\n").split(" ") for line in open("/etc/mtab", "r").readlines()]
         system_mounts = set([mp for src, mp, fs, opt, p1, p2 in lines if fs == "fuse.sshfs"])
-        possible_owned_mounts = set([os.path.join(config.mountRootDir, d) for d in os.listdir(config.mountRootDir)])
+        possible_owned_mounts = set([os.path.join(mount_root_dir, d) for d in os.listdir(mount_root_dir)])
         owned_mounts = system_mounts & possible_owned_mounts
         return list(owned_mounts)
 
     @property
     def is_mounted(self):
-        return self.mountpoint in Sshfs.mounts(self.config)
+        return self.mountpoint in Sshfs.mounts(self.config.mount_root_dir)
 
     @property
     def mountpoint(self):
-        return os.path.join(self.config.mountRootDir, '%s@%s' % (self.instance.name, self.instance.address))
+        return os.path.join(self.config.mount_root_dir, '%s@%s' % (self.instance.name, self.instance.address))
 
     def mount(self):
         if not self.remotedir:
