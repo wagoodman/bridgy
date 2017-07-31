@@ -58,6 +58,9 @@ class Config(object):
     __conf = None
     inventorySources = ['gcp', 'aws', 'csv']
 
+    def __init__(self, initialData=None):
+        self.__conf = initialData
+
     def read(self):
         # ensure yaml uses a defaultdict(str)
         yaml.add_representer(collections.defaultdict,
@@ -110,6 +113,9 @@ class Config(object):
 
     def __getitem__(self, key):
         return self.__conf[key]
+
+    def __setitem__(self, key, value):
+        self.__conf[key] = value
 
     def __repr__(self):
         return repr(self.__conf)
