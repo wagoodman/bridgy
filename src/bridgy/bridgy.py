@@ -119,7 +119,7 @@ def ssh_handler():
         layout = ARGS['--layout']
 
     try:
-        tmux.run(commands, ARGS['-w'], layout)
+        tmux.run(CONFIG, commands, ARGS['-w'], layout)
     except EnvironmentError:
         logger.error('Tmux not installed.')
         sys.exit(1)

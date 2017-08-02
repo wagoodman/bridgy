@@ -60,6 +60,7 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
   - [x] aws
   - [ ] google cloud
   - [ ] ansible inventory
+  - [ ] new relic
   - [x] csv
 
 ## Installing
