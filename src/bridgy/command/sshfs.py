@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import base
+from error import *
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class Sshfs(base.BaseCommand):
         return cmd.format(destination=self.destination,
                           remotedir=self.remotedir,
                           mountpoint=self.mountpoint,
-                          options=self.options )
+                          options=self.options)
 
     @classmethod
     def mounts(cls, mount_root_dir):
@@ -36,7 +37,7 @@ class Sshfs(base.BaseCommand):
 
     def mount(self):
         if not self.remotedir:
-            raise RuntimeError("No remotedir specified")
+            raise BadRemoteDir("No remotedir specified")
 
         if not os.path.exists(self.mountpoint):
             os.mkdir(self.mountpoint)
@@ -50,7 +51,7 @@ class Sshfs(base.BaseCommand):
             return True
 
         logger.error("Failed to mount instance {} at {}".format(self.instance, self.mountpoint))
-        os.rmdir(mountpoint)
+        os.rmdir(self.mountpoint)
         return False
 
     def unmount(self, mountpoint=None):

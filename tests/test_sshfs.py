@@ -1,12 +1,12 @@
 from StringIO import StringIO
-from mock import MagicMock, patch
+import mock
 import pytest
 import shlex
 import re
 
 from bridgy.command import Sshfs
 from bridgy.inventory import Instance
-from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost
+from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost, BadRemoteDir
 from bridgy.config import Config
 
 instance = Instance('name', 'address.com')
@@ -25,46 +25,37 @@ def assert_command_results(result1, result2):
 
 ### Mounting / Unmounting ######################################################
 
-# def mock_open(mock=None, data=None):
-#     if mock is None:
-#         mock = MagicMock(spec=file)
-#
-#     handle = MagicMock(spec=file)
-#     handle.write.return_value = None
-#     if data is None:
-#         handle.__enter__.return_value = handle
-#     else:
-#         handle.__enter__.return_value = data
-#     mock.return_value = handle
-#     return mock
-#
-# TODO: mock ls dir with results, make more dry
-#
-# def test_mount():
-#     data="""\
-# ysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
-# proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
-# udev /dev devtmpfs rw,nosuid,relatime,size=16359216k,nr_inodes=4089804,mode=755 0 0
-# devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
-# tmpfs /run tmpfs rw,nosuid,noexec,relatime,size=3276836k,mode=755 0 0
-# tmpfs /dev/shm tmpfs rw,nosuid,nodev 0 0
-# tmpfs /run/lock tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k 0 0
-# tmpfs /sys/fs/cgroup tmpfs ro,nosuid,nodev,noexec,mode=755 0 0
-# cgroup /sys/fs/cgroup/systemd cgroup rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/lib/systemd/systemd-cgroups-agent,name=systemd 0 0
-# pstore /sys/fs/pstore pstore rw,nosuid,nodev,noexec,relatime 0 0
-# efivarfs /sys/firmware/efi/efivars efivarfs rw,nosuid,nodev,noexec,relatime 0 0
-# tmpfs /run/user/1000 tmpfs rw,nosuid,nodev,relatime,size=3276836k,mode=700,uid=1000,gid=1000 0 0
-# gvfsd-fuse /run/user/1000/gvfs fuse.gvfsd-fuse rw,nosuid,nodev,relatime,user_id=1000,group_id=1000 0 0
-# ubuntu@devbox:/tmp /home/dummy/.bridgy/mounts/awesomebox@devbox fuse.sshfs rw,nosuid,nodev,relatime,user_id=1000,group_id=1000 0 0"""
-#     mocked_result = mock_open(data=StringIO(data))
-#     filename = '/etc/mtab'
-#     owned_mount = '/home/dummy/.bridgy/mounts/awesomebox@devbox'
-#     config = Config({}
-#     with patch('__main__.open', mocked_result, create=True):
-#         result = Sshfs.mounts()
-#     assert owned_mount in result
-#     mocked_result.assert_called_once_with(filename)
+def test_mount_remotedir_missing():
+    config = Config({})
+    sshObj = Sshfs(config, instance)
+    with pytest.raises(BadRemoteDir):
+        sshObj.mount()
 
+@mock.patch('os.rmdir', side_effect=lambda x: True)
+@mock.patch('os.system', side_effect=lambda x: 0)
+@mock.patch('os.mkdir', side_effect=lambda x: True)
+@mock.patch('os.path.exists', side_effect=lambda x: False)
+def test_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rmdir):
+    config = Config({})
+    sshObj = Sshfs(config, instance, remotedir='/tmp/test')
+    sshObj.mount()
+    assert mock_exists.called
+    assert mock_mkdir.called
+    assert mock_system.called
+    assert not mock_rmdir.called
+
+@mock.patch('os.rmdir', side_effect=lambda x: True)
+@mock.patch('os.system', side_effect=lambda x: 1)
+@mock.patch('os.mkdir', side_effect=lambda x: True)
+@mock.patch('os.path.exists', side_effect=lambda x: False)
+def test_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir):
+    config = Config({})
+    sshObj = Sshfs(config, instance, remotedir='/tmp/test')
+    sshObj.mount()
+    assert mock_exists.called
+    assert mock_mkdir.called
+    assert mock_system.called
+    assert mock_rmdir.called
 
 ### Command Formatting #########################################################
 

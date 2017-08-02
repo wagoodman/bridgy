@@ -56,12 +56,18 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 - [ ] push / pull files to and from instances (ansible? scp?)
 - [x] setup sshfs mount to a remote dir
 - [x] templating configurations for logging into systems and running commands
-- [ ] osx friendly
 - [x] supported inventory backends
   - [x] aws
   - [ ] google cloud
   - [ ] ansible inventory
   - [x] csv
+
+## Installing
+
+```
+sudo apt install -y sshfs tmux
+pip install bridgy
+```
 
 ## Usage
 ```
