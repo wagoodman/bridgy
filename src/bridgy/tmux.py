@@ -20,7 +20,7 @@ def run(config, commands, in_windows=False, layout=None):
 # adapted from https://github.com/spappier/tmuxssh/
 class TmuxSession(object):
 
-    def __init__(self, session_name=None, commands=None, in_windows=False, layout_cmds=None):
+    def __init__(self, session_name=None, commands=tuple(), in_windows=False, layout_cmds=None):
         self._session_name = session_name or 'tmux-{}'.format(os.getpid())
         self._commands = commands
         self._in_windows = in_windows
