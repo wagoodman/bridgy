@@ -45,17 +45,19 @@ def assert_command_results(result1, result2):
 
 ### Mounting / Unmounting ######################################################
 
-def test_mount_remotedir_missing():
+def test_sshfs_mount_remotedir_missing():
     config = Config({})
     sshObj = Sshfs(config, instance)
     with pytest.raises(BadRemoteDir):
         sshObj.mount()
 
+@mock.patch.object(os, 'listdir')
 @mock.patch('os.rmdir', side_effect=lambda x: True)
 @mock.patch('os.system', side_effect=lambda x: 0)
 @mock.patch('os.mkdir', side_effect=lambda x: True)
 @mock.patch('os.path.exists', side_effect=lambda x: False)
-def test_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rmdir):
+def test_sshfs_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rmdir, mock_ls):
+    mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
     config = Config({})
     sshObj = Sshfs(config, instance, remotedir='/tmp/test')
     sshObj.mount()
@@ -64,11 +66,13 @@ def test_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rmdir):
     assert mock_system.called
     assert not mock_rmdir.called
 
+@mock.patch.object(os, 'listdir')
 @mock.patch('os.rmdir', side_effect=lambda x: True)
 @mock.patch('os.system', side_effect=lambda x: 1)
 @mock.patch('os.mkdir', side_effect=lambda x: True)
 @mock.patch('os.path.exists', side_effect=lambda x: False)
-def test_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir):
+def test_sshfs_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir, mock_ls):
+    mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
     config = Config({})
     sshObj = Sshfs(config, instance, remotedir='/tmp/test')
     sshObj.mount()
@@ -79,7 +83,7 @@ def test_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir):
 
 @mock.patch.object(os, 'listdir')
 @mock.patch.object(__builtin__, 'open')
-def test_mounts(mock_open, mock_ls):
+def test_sshfs_mounts(mock_open, mock_ls):
     mock_open.return_value = StringIO(MTAB)
     mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
 
@@ -94,7 +98,7 @@ def test_mounts(mock_open, mock_ls):
 @mock.patch.object(os, 'rmdir')
 @mock.patch.object(os, 'system')
 @mock.patch.object(os.path, 'exists')
-def test_unmount_go_case(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_go_case(mock_exists, mock_system, mock_rmdir):
     mock_exists.return_value = True
     mock_system.return_value = 0
     mock_rmdir.return_value = True
@@ -109,7 +113,7 @@ def test_unmount_go_case(mock_exists, mock_system, mock_rmdir):
 @mock.patch.object(os, 'rmdir')
 @mock.patch.object(os, 'system')
 @mock.patch.object(os.path, 'exists')
-def test_unmount_mountpoint_dne(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_mountpoint_dne(mock_exists, mock_system, mock_rmdir):
     mock_exists.return_value = False
     mock_system.return_value = 0
     mock_rmdir.return_value = True
@@ -124,7 +128,7 @@ def test_unmount_mountpoint_dne(mock_exists, mock_system, mock_rmdir):
 @mock.patch.object(os, 'rmdir')
 @mock.patch.object(os, 'system')
 @mock.patch.object(os.path, 'exists')
-def test_unmount_fuse_failure(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_fuse_failure(mock_exists, mock_system, mock_rmdir):
     mock_exists.return_value = True
     mock_system.return_value = 1
     mock_rmdir.return_value = True
@@ -138,7 +142,7 @@ def test_unmount_fuse_failure(mock_exists, mock_system, mock_rmdir):
 
 ### Command Formatting #########################################################
 
-def test_command_go_case():
+def test_sshfs_command_go_case():
     config = Config({
         'ssh': {}
     })
@@ -147,14 +151,14 @@ def test_command_go_case():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, 'sshfs address.com:/tmp %s' % mount_arg)
 
-def test_command_go_case_no_options():
+def test_sshfs_command_go_case_no_options():
     config = Config({})
     remotedir = '/tmp'
     sshObj = Sshfs(config, instance, remotedir)
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, 'sshfs address.com:/tmp %s' % mount_arg)
 
-def test_command_user():
+def test_sshfs_command_user():
     config = Config({
         'ssh': {
             'user': 'username'
@@ -165,7 +169,7 @@ def test_command_user():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, 'sshfs username@address.com:/tmp %s' % mount_arg)
 
-def test_options():
+def test_sshfs_options():
     config = Config({
         'ssh': {
             'user': 'username',
@@ -177,7 +181,7 @@ def test_options():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, 'sshfs -C -o ServerAliveInterval=255 username@address.com:/tmp %s' % mount_arg)
 
-def test_command_no_user():
+def test_sshfs_command_no_user():
     config = Config({
         'ssh': {
             'options': '-C -o ServerAliveInterval=255'
@@ -188,7 +192,7 @@ def test_command_no_user():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, 'sshfs -C -o ServerAliveInterval=255 address.com:/tmp %s' % mount_arg)
 
-def test_command_bastion_options():
+def test_sshfs_command_bastion_options():
     config = Config({
         'bastion': {
             'address': 'bastion.com',
@@ -200,7 +204,7 @@ def test_command_bastion_options():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, "sshfs -o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %%h:%%p bastion.com' address.com:/tmp %s" % mount_arg)
 
-def test_command_bastion_user():
+def test_sshfs_command_bastion_user():
     config = Config({
         'bastion': {
             'address': 'bastion.com',
@@ -212,7 +216,7 @@ def test_command_bastion_user():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, "sshfs -o ProxyCommand='ssh -W %%h:%%p bastionuser@bastion.com' address.com:/tmp %s" % mount_arg)
 
-def test_command_bastion_missing_address():
+def test_sshfs_command_bastion_missing_address():
     config = Config({
         'bastion': {}
     })
@@ -221,14 +225,14 @@ def test_command_bastion_missing_address():
         sshObj = Sshfs(config, instance, remotedir)
         sshObj.command
 
-def test_command_null_instance():
+def test_sshfs_command_null_instance():
     config = Config({})
     remotedir = '/tmp'
     with pytest.raises(BadInstanceError):
         sshObj = Sshfs(config, None)
         sshObj.command
 
-def test_command_null_config():
+def test_sshfs_command_null_config():
     remotedir = '/tmp'
     with pytest.raises(BadConfigError):
         sshObj = Sshfs(None, instance, remotedir)

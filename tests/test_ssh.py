@@ -21,19 +21,19 @@ def assert_command_results(result1, result2):
         item2 = whitespace_pattern.sub(' ', item2)
         assert item1 == item2
 
-def test_command_go_case():
+def test_ssh_command_go_case():
     config = {
         'ssh': {}
     }
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh address.com')
 
-def test_command_go_case_no_options():
+def test_ssh_command_go_case_no_options():
     config = {}
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh address.com')
 
-def test_command_user():
+def test_ssh_command_user():
     config = {
         'ssh': {
             'user': 'username'
@@ -42,7 +42,7 @@ def test_command_user():
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh username@address.com')
 
-def test_command_options():
+def test_ssh_command_options():
     config = {
         'ssh': {
             'user': 'username',
@@ -52,7 +52,7 @@ def test_command_options():
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 username@address.com')
 
-def test_command_no_user():
+def test_ssh_command_no_user():
     config = {
         'ssh': {
             'options': '-C -o ServerAliveInterval=255'
@@ -61,7 +61,7 @@ def test_command_no_user():
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 address.com')
 
-def test_command_bastion_options():
+def test_ssh_command_bastion_options():
     config = {
         'bastion': {
             'address': 'bastion.com',
@@ -71,7 +71,7 @@ def test_command_bastion_options():
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' address.com")
 
-def test_command_bastion_user():
+def test_ssh_command_bastion_user():
     config = {
         'bastion': {
             'address': 'bastion.com',
@@ -81,7 +81,7 @@ def test_command_bastion_user():
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -W %h:%p bastionuser@bastion.com' address.com")
 
-def test_command_bastion_missing_address():
+def test_ssh_command_bastion_missing_address():
     config = {
         'bastion': {}
     }
@@ -89,13 +89,13 @@ def test_command_bastion_missing_address():
         sshObj = Ssh(config, instance)
         sshObj.command
 
-def test_command_null_instance():
+def test_ssh_command_null_instance():
     config = {}
     with pytest.raises(BadInstanceError):
         sshObj = Ssh(config, None)
         sshObj.command
 
-def test_command_null_config():
+def test_ssh_command_null_config():
     with pytest.raises(BadConfigError):
         sshObj = Ssh(None, instance)
         sshObj.command
