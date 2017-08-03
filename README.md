@@ -1,5 +1,7 @@
 # bridgy
 
+![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)
+
 ***Note: this is a work in progress, so no guarentees!***
 
 (*TL;DR: this tool = AWS cli + ssh + tmux + sshfs*)
