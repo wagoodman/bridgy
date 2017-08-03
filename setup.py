@@ -27,7 +27,7 @@ setup(
         ],
     entry_points={
         'console_scripts': [
-            'bridgy = bridgy.__main__:main'
+            'bridgy = bridgy.bridgy:main'
         ]
     },
 )
