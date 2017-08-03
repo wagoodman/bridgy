@@ -2,28 +2,46 @@ from setuptools import find_packages
 from setuptools import setup
 from glob import glob
 
-# with open('requirements.txt') as f:
-#     required_packages = f.read().splitlines()
-
 setup(
     name='bridgy',
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/wagoodman/bridgy',
     license='MIT',
-    author='William Alex Goodman',
+    author='Alex Goodman',
+    author_email='wagoodman+bridgy@gmail.com',
     description='Tool for combining aws cli + tmux + sshfs',
-    #install_requires=required_packages,
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
+    install_requires=['PyYAML',
+                      'docopt',
+                      'inquirer',
+                      'fuzzywuzzy',
+                      'boto3',
+                      'placebo',
+                      'python-Levenshtein',
+                      'coloredlogs'],
     platforms='linux',
+    keywords=['tmux', 'ssh', 'sshfs', 'aws'],
+    # latest from https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers = [
-        'Programming Language :: Python',
-        'Natural Language :: English',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: System :: Monitoring',
+        'Topic :: System :: Systems Administration',
+        'Topic :: System :: System Shells',
+        'Topic :: Terminals',
+        'Topic :: Utilities',
         ],
     entry_points={
         'console_scripts': [
