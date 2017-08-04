@@ -96,6 +96,7 @@ class TmuxSession(object):
 
     def tmux(self, *args):
         cmd = ['tmux'] + list(args)
+        logger.debug(' '.join(cmd))
         pipes = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         std_out, std_err = pipes.communicate()
 

@@ -8,7 +8,7 @@ setup(
     url='https://github.com/wagoodman/bridgy',
     license='MIT',
     author='Alex Goodman',
-    author_email='wagoodman+bridgy@gmail.com',
+    author_email='wagoodman@gmail.com',
     description='Tool for combining aws cli + tmux + sshfs',
     packages=find_packages('src'),
     package_dir={'': 'src'},

@@ -3,6 +3,7 @@
 ![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)
 
 *TL;DR: this tool = AWS cli + ssh + tmux + sshfs*
+**Note: this is a work in progress (alpha-ish)**
 
 Just get me to my ec2 box with a simple search. Multiple matches? Just
 ssh into all matches in a tmux session.

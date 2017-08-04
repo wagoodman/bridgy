@@ -4,10 +4,10 @@ Fuzzy search for one or more aws hosts then ssh into all matches, organized
 by tmux.
 
 Usage:
-  bridgy ssh [-teauw] [-l LAYOUT] <host>...
+  bridgy ssh [-teauwv] [-l LAYOUT] <host>...
   bridgy list-mounts
-  bridgy mount <host>:<remotedir>
-  bridgy unmount (-a | <host>...)
+  bridgy mount [-v] <host>:<remotedir>
+  bridgy unmount [-v] (-a | <host>...)
   bridgy update
   bridgy (-h | --help)
   bridgy --version
@@ -26,6 +26,7 @@ Options:
   -u        --update         pull the latest instance inventory from aws then run the specified command
   -w        --windows        Use tmux windows instead of panes for each matched host.
   -h        --help           Show this screen.
+  -v        --verbose        Show debug information.
   --version                  Show version.
 
 Configuration Options are in ~/.bridgy/config.yml
@@ -212,6 +213,9 @@ def main():
     version = 'bridgy %s' % __version__
 
     args = docopt(__doc__, version=version)
+
+    if args['-v']:
+        coloredlogs.install(fmt='%(message)s', level='DEBUG')
 
     if args['--version']:
         logger.info(version)

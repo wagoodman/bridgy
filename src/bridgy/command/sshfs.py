@@ -6,6 +6,10 @@ from error import *
 
 logger = logging.getLogger(__name__)
 
+def run(cmd):
+    logger.debug(cmd)
+    return os.system(cmd)
+
 class Sshfs(base.BaseCommand):
     def __init__(self, config, instance, remotedir=None):
         super(self.__class__, self).__init__(config, instance)
@@ -46,7 +50,8 @@ class Sshfs(base.BaseCommand):
             logger.warn("Already mounted at %s" % self.mountpoint)
             sys.exit(1)
 
-        rc = os.system(self.command)
+
+        rc = run(self.command)
         if rc == 0:
             return True
 
@@ -58,7 +63,7 @@ class Sshfs(base.BaseCommand):
         if not mountpoint:
             mountpoint = self.mountpoint
 
-        if os.path.exists(mountpoint) and os.system("fusermount -u %s" % mountpoint) == 0:
+        if os.path.exists(mountpoint) and run("fusermount -u %s" % mountpoint) == 0:
             os.rmdir(mountpoint)
             return True
         return False
