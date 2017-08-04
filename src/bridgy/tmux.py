@@ -44,9 +44,9 @@ class TmuxSession(object):
                 # create each pane
                 for idx, item in enumerate(self._layout_cmds):
 
-                    cmd = shlex.split(item['cmd']) + ['-t', name] + shlex.split(command)
+                    cmd = [item['cmd'], '-t', name, command]
                     if 'run' in item:
-                        cmd += shlex.split(item['run'])
+                        cmd.append(item['run'])
 
                     self.tmux(*cmd)
 
@@ -113,7 +113,7 @@ class TmuxSession(object):
         if window_name:
             cmd += ['-n', window_name]
         if command:
-            cmd += shlex.split(command)
+            cmd += [command]
 
         self.tmux(*cmd)
         self._created_session = True
@@ -121,13 +121,13 @@ class TmuxSession(object):
     @run_only_with_session
     def new_window(self, name, command):
         if command:
-            self.tmux('new-window', '-n', name, *shlex.split(command))
+            self.tmux('new-window', '-n', name, command)
         else:
             self.tmux('new-window', '-n', name)
 
     @run_only_with_session
     def split_window(self, command):
-        self.tmux('split-window', '-t', self._session_name, *shlex.split(command))
+        self.tmux('split-window', '-t', self._session_name, command)
 
     @run_only_with_session
     def select_layout(self, layout):
