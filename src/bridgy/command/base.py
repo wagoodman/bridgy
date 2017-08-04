@@ -15,8 +15,8 @@ class BaseCommand:
 
     @property
     def destination(self):
-        if 'ssh' in self.config and 'user' in self.config['ssh']:
-            return '{user}@{host}'.format(user=self.config['ssh']['user'],
+        if self.config.dig('ssh', 'user'):
+            return '{user}@{host}'.format(user=self.config.dig('ssh', 'user'),
                                           host=self.instance.address)
         else:
             return self.instance.address
@@ -27,26 +27,23 @@ class BaseCommand:
         options = ''
 
         if 'bastion' in self.config:
-            if 'address' not in self.config['bastion']:
+            if not self.config.dig('bastion', 'address'):
                 raise MissingBastionHost
 
             # build a destination from possible config combinations
-            if 'user' in self.config['bastion']:
-                destination = '{user}@{host}'.format(user=self.config['bastion']['user'],
-                                                     host=self.config['bastion']['address'])
+            if self.config.dig('bastion', 'user'):
+                destination = '{user}@{host}'.format(user=self.config.dig('bastion', 'user'),
+                                                     host=self.config.dig('bastion', 'address'))
             else:
-                destination = self.config['bastion']['address']
+                destination = self.config.dig('bastion', 'address')
 
-            bastion_options = ''
-            if 'options' in self.config['bastion']:
-                bastion_options = self.config['bastion']['options']
+            bastion_options = self.config.dig('bastion', 'options') or ''
 
             template = "-o ProxyCommand='ssh {options} -W %h:%p {destination}'"
             bastion = template.format(options=bastion_options,
                                       destination=destination)
 
-        if 'ssh' in self.config and 'options' in self.config['ssh']:
-            options = self.config['ssh']['options']
+        options = self.config.dig('ssh', 'options') or ''
 
         return '{} {}'.format(bastion, options)
 

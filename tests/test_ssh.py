@@ -5,6 +5,7 @@ import re
 from bridgy.command import Ssh
 from bridgy.inventory import Instance
 from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost
+from bridgy.config import Config
 
 instance = Instance('name', 'address.com')
 
@@ -22,75 +23,75 @@ def assert_command_results(result1, result2):
         assert item1 == item2
 
 def test_ssh_command_go_case():
-    config = {
+    config = Config({
         'ssh': {}
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh address.com')
 
 def test_ssh_command_go_case_no_options():
-    config = {}
+    config = Config({})
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh address.com')
 
 def test_ssh_command_user():
-    config = {
+    config = Config({
         'ssh': {
             'user': 'username'
         }
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh username@address.com')
 
 def test_ssh_command_options():
-    config = {
+    config = Config({
         'ssh': {
             'user': 'username',
             'options': '-C -o ServerAliveInterval=255'
         }
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 username@address.com')
 
 def test_ssh_command_no_user():
-    config = {
+    config = Config({
         'ssh': {
             'options': '-C -o ServerAliveInterval=255'
         }
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 address.com')
 
 def test_ssh_command_bastion_options():
-    config = {
+    config = Config({
         'bastion': {
             'address': 'bastion.com',
             'options': '-C -o ServerAliveInterval=255'
         }
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' address.com")
 
 def test_ssh_command_bastion_user():
-    config = {
+    config = Config({
         'bastion': {
             'address': 'bastion.com',
             'user': 'bastionuser'
         }
-    }
+    })
     sshObj = Ssh(config, instance)
     assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -W %h:%p bastionuser@bastion.com' address.com")
 
 def test_ssh_command_bastion_missing_address():
-    config = {
+    config = Config({
         'bastion': {}
-    }
+    })
     with pytest.raises(MissingBastionHost):
         sshObj = Ssh(config, instance)
         sshObj.command
 
 def test_ssh_command_null_instance():
-    config = {}
+    config = Config({})
     with pytest.raises(BadInstanceError):
         sshObj = Ssh(config, None)
         sshObj.command

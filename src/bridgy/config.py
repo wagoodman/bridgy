@@ -24,6 +24,11 @@ aws:
   session_token: SESSION_TOKEN
   region: us-west-2
 
+# all newrelic inventory configuration
+newrelic:
+  account_number: ACCOUNT_NUMBER
+  insights_query_api_key: API_KEY
+
 # define ssh behavior and preferences
 ssh:
   user: ubuntu
