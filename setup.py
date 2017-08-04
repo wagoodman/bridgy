@@ -2,13 +2,15 @@ from setuptools import find_packages
 from setuptools import setup
 from glob import glob
 
+execfile('src/bridgy/version.py')
+
 setup(
     name='bridgy',
-    version='0.0.5',
+    version=__version__,
     url='https://github.com/wagoodman/bridgy',
-    license='MIT',
-    author='Alex Goodman',
-    author_email='wagoodman@gmail.com',
+    license=__license__,
+    author=__author__,
+    author_email=__email__,
     description='Tool for combining aws cli + tmux + sshfs',
     packages=find_packages('src'),
     package_dir={'': 'src'},
