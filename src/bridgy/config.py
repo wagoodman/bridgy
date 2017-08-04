@@ -4,6 +4,8 @@ import logging
 import yaml
 import os
 
+import inventory
+
 CONFIG_TEMPLATE = """
 # what source should be used as an inventory source
 inventory:
@@ -61,11 +63,9 @@ class Config(object):
     __inventory = "~/.bridgy/inventory"
     __mount = "~/.bridgy/mounts"
     __conf = None
-    # todo: remove this and make the inventory module the source of truth
-    inventorySources = ['gcp', 'aws', 'csv', 'newrelic']
 
-    def __init__(self, initialData=None):
-        self.__conf = initialData
+    def __init__(self, initial_data=None):
+        self.__conf = initial_data
 
     def read(self):
         # ensure yaml uses a defaultdict(str)
@@ -75,33 +75,33 @@ class Config(object):
             self.__conf = yaml.load(fh)
 
     def create(self):
-        configFile = os.path.expanduser(self.__path)
-        if not os.path.exists(configFile):
+        config_file = os.path.expanduser(self.__path)
+        if not os.path.exists(config_file):
             logging.getLogger().info("Creating %s" % self.__path)
-            parentDir = os.path.dirname(configFile)
-            if not os.path.exists(parentDir):
-                os.mkdir(parentDir)
-            with open(configFile, 'w') as fh:
+            parent_dir = os.path.dirname(config_file)
+            if not os.path.exists(parent_dir):
+                os.mkdir(parent_dir)
+            with open(config_file, 'w') as fh:
                 fh.write(CONFIG_TEMPLATE)
 
-        inventoryCache = os.path.expanduser(self.__inventory)
-        if not os.path.exists(inventoryCache):
-            parentDir = os.path.dirname(inventoryCache)
-            if not os.path.exists(parentDir):
-                os.mkdir(parentDir)
-            os.mkdir(inventoryCache)
+        inventory_cache = os.path.expanduser(self.__inventory)
+        if not os.path.exists(inventory_cache):
+            parent_dir = os.path.dirname(inventory_cache)
+            if not os.path.exists(parent_dir):
+                os.mkdir(parent_dir)
+            os.mkdir(inventory_cache)
 
-        for source in self.inventorySources:
-            sourcePath = os.path.join(inventoryCache, source)
-            if not os.path.exists(sourcePath):
-                os.mkdir(sourcePath)
+        for source in inventory.SOURCES.keys():
+            source_path = os.path.join(inventory_cache, source)
+            if not os.path.exists(source_path):
+                os.mkdir(source_path)
 
-        mountPath = os.path.expanduser(self.__mount)
-        if not os.path.exists(mountPath):
-            os.mkdir(mountPath)
+        mount_path = os.path.expanduser(self.__mount)
+        if not os.path.exists(mount_path):
+            os.mkdir(mount_path)
 
     def inventoryDir(self, source):
-        if source not in self.inventorySources:
+        if source not in inventory.SOURCES.keys():
             raise RuntimeError(
                 "Unexpected inventory source: %s" % repr(source))
         return os.path.join(os.path.expanduser(self.__inventory),
