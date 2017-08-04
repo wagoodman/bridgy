@@ -32,11 +32,10 @@ class NewRelicInventory(InventorySource):
 
         for results_dict in data['results']:
             for event_dict in results_dict['events']:
-                hostname = event_dict['fullHostname']
+                hostname = event_dict['hostname']
                 address = event_dict['ipV4Address'].strip().split("/")[0]
                 if hostname == None:
                     hostname = address
                 instances.add(Instance(hostname, address))
-
 
         return list(instances)

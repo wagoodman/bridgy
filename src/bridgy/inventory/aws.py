@@ -1,6 +1,7 @@
 from source import InventorySource, Instance
 
 import boto3
+# TODO: remove placebo and cache manually
 import placebo
 
 class AwsInventory(InventorySource):
