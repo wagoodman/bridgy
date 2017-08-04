@@ -112,6 +112,16 @@ class Config(object):
     def __iter__(self):
         return iter(self.__conf)
 
+    def dig(self, *original_keys):
+        def __dig(d, *keys):
+            try:
+                if len(keys) == 1:
+                    return d[keys[0]]
+                return __dig(d[keys[0]], *keys[1:])
+            except KeyError:
+                return None
+        return __dig(self.__conf, *original_keys)
+
     def __getitem__(self, key):
         return self.__conf[key]
 

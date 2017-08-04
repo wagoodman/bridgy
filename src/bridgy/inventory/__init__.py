@@ -15,7 +15,6 @@ SOURCES = {
 
 
 def inventory(config):
-
     source = config['inventory']['source']
     srcCfg = config[source]
     if source == 'aws':

@@ -107,6 +107,9 @@ def prompt_targets(question, targets=None, instances=None, multiple=True):
 
 
 def ssh_handler(args, config):
+    if config.dig('inventory', 'update_at_start'):
+        update_handler(args, config)
+
     question = "What instances would you like to ssh into?"
     targets = prompt_targets(question, targets=args['<host>'])
 
@@ -131,6 +134,9 @@ def ssh_handler(args, config):
 
 
 def mount_handler(args, config):
+    if config.dig('inventory', 'update_at_start'):
+        update_handler(args, config)
+
     fields = args['<host>:<remotedir>'].split(':')
 
     if len(fields) != 2:
@@ -190,9 +196,9 @@ def unmount_handler(args, config):
 
 
 def update_handler(args, config):
-    raise RuntimeError("Unimplemented")
-    inventory = inventory(config)
-    inventory.update()
+    logger.info("Updating inventory...")
+    inventory_obj = inventory.inventory(config)
+    inventory_obj.update()
 
 
 def main():
