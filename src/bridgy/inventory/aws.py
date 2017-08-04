@@ -19,10 +19,10 @@ class AwsInventory(InventorySource):
         self.client = session.client('ec2')
 
     def update(self):
-        self.__ec2(stub=False)
+        self.__ec2_search(stub=False)
 
-    def instances(self, stub=True):
-        data = self.__ec2(stub=stub)
+    def instances(self):
+        data = self.__ec2_search(stub=True)
 
         instances = []
         for reservation in data['Reservations']:
@@ -55,7 +55,7 @@ class AwsInventory(InventorySource):
 
         return instances
 
-    def __ec2(self, tag=None, value=None, stub=True):
+    def __ec2_search(self, tag=None, value=None, stub=True):
         filters = []
         if value:
             filters.append({

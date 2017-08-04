@@ -15,7 +15,7 @@ SOURCES = {
 
 
 def inventory(config):
-    source = config['inventory']['source']
+    source = config.dig('inventory', 'source')
     srcCfg = config[source]
     if source == 'aws':
         return AwsInventory(aws_access_key_id=srcCfg['access_key_id'],

@@ -8,10 +8,9 @@ logger = logging.getLogger()
 def run(config, commands, in_windows=False, layout=None):
     layout_cmds = None
     if layout:
-        if layout not in config['tmux']['layout']:
+        layout_cmds = config.dig('tmux', 'layout', layout)
+        if not layout_cmds:
             raise RuntimeError("Config does not define layout: %s" % layout)
-        else:
-            layout_cmds = config['tmux']['layout'][layout]
 
     with TmuxSession(commands=commands, in_windows=in_windows, layout_cmds=layout_cmds) as tmux:
         tmux.attach()
