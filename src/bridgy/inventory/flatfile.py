@@ -5,8 +5,7 @@ import csv
 
 class CsvInventory(InventorySource):
 
-    @property
-    def name(self): return 'csv'
+    name = 'csv'
 
     def __init__(self, path, fields, delimiter=','):
         self.csvPath = path

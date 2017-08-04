@@ -5,17 +5,16 @@ import placebo
 
 class AwsInventory(InventorySource):
 
-    @property
-    def name(self): return 'aws'
+    name = 'aws'
 
-    def __init__(self, access_key_id, secret_access_key, session_token, region):
+    def __init__(self, access_key_id, secret_access_key, session_token, region, cache_dir):
         session = boto3.Session(
             aws_access_key_id=access_key_id,
             aws_secret_access_key=secret_access_key,
             aws_session_token=session_token,
             region_name=region
         )
-        self.pill = placebo.attach(session, data_path=Config.inventoryDir(self.name))
+        self.pill = placebo.attach(session, data_path=cache_dir)
 
         self.client = session.client('ec2')
 

@@ -15,6 +15,7 @@ setup(
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
     install_requires=['PyYAML',
+                      'requests',
                       'docopt',
                       'inquirer',
                       'fuzzywuzzy',

@@ -56,7 +56,8 @@ class Config(object):
     __inventory = "~/.bridgy/inventory"
     __mount = "~/.bridgy/mounts"
     __conf = None
-    inventorySources = ['gcp', 'aws', 'csv']
+    # todo: remove this and make the inventory module the source of truth
+    inventorySources = ['gcp', 'aws', 'csv', 'newrelic']
 
     def __init__(self, initialData=None):
         self.__conf = initialData
