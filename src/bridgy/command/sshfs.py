@@ -11,17 +11,24 @@ def run(cmd):
     return os.system(cmd)
 
 class Sshfs(base.BaseCommand):
-    def __init__(self, config, instance, remotedir=None):
+    def __init__(self, config, instance, remotedir=None, dry_run=False):
         super(self.__class__, self).__init__(config, instance)
         self.remotedir = remotedir
+        self.dry_run = dry_run
 
     @property
     def command(self):
-        cmd = 'sshfs {options} {destination}:{remotedir} {mountpoint}'
+        cmd = 'sshfs {sshoptions} {destination}:{remotedir} {mountpoint} {mountoptions}'
+
+        mountoptions = ''
+        if self.config.dig('sshfs','options'):
+            mountoptions = '-o%s'%self.config.dig('sshfs','options')
+
         return cmd.format(destination=self.destination,
                           remotedir=self.remotedir,
                           mountpoint=self.mountpoint,
-                          options=self.options)
+                          sshoptions=self.options,
+                          mountoptions=mountoptions)
 
     @classmethod
     def mounts(cls, mount_root_dir):
@@ -50,6 +57,9 @@ class Sshfs(base.BaseCommand):
             logger.warn("Already mounted at %s" % self.mountpoint)
             sys.exit(1)
 
+        if self.dry_run:
+            logger.debug(self.command)
+            return True
 
         rc = run(self.command)
         if rc == 0:
@@ -62,6 +72,10 @@ class Sshfs(base.BaseCommand):
     def unmount(self, mountpoint=None):
         if not mountpoint:
             mountpoint = self.mountpoint
+
+        if self.dry_run:
+            logger.debug(self.command)
+            return
 
         if os.path.exists(mountpoint) and run("fusermount -u %s" % mountpoint) == 0:
             os.rmdir(mountpoint)

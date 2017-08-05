@@ -216,6 +216,17 @@ def test_sshfs_command_bastion_user():
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
     assert_command_results(sshObj.command, "sshfs -o ProxyCommand='ssh -W %%h:%%p bastionuser@bastion.com' address.com:/tmp %s" % mount_arg)
 
+def test_sshfs_command_mountoptions():
+    config = Config({
+        'sshfs': {
+            'options': 'auto_cache,reconnect,defer_permissions,noappledouble,nolocalcaches,no_readahead'
+        }
+    })
+    remotedir = '/tmp'
+    sshObj = Sshfs(config, instance, remotedir)
+    mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
+    assert_command_results(sshObj.command, "sshfs address.com:/tmp %s -o%s" % (mount_arg, config.dig('sshfs', 'options')))
+
 def test_sshfs_command_bastion_missing_address():
     config = Config({
         'bastion': {}

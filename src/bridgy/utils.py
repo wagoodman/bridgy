@@ -9,6 +9,16 @@ import inventory
 
 logger = logging.getLogger()
 
+class color:
+    PURPLE = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    RED = '\033[91m'
+    UNDERLINE = '\033[4m'
+    NORMAL = '\033[0m'
+    BOLD = '\033[1m'
+
 class UnsupportedPlatform(Exception): pass
 
 class SupportedPlatforms(object):
@@ -58,13 +68,13 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
 
     if multiple:
         q = inquirer.Checkbox('instance',
-                              message="%s (space to multi-select, enter to finish)" % question,
+                              message="%s%s%s (space to multi-select, enter to finish)" % (color.BOLD, question, color.NORMAL),
                               choices=display_instances.keys() + ['all'],
                               # default='all'
                               )
     else:
         q = inquirer.List('instance',
-                           message="%s (enter to select)" % question,
+                           message="%s%s%s (enter to select)" % (color.BOLD, question, color.NORMAL),
                            choices=display_instances.keys(),
                            )
     questions.append(q)

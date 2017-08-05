@@ -5,27 +5,28 @@ import subprocess
 
 logger = logging.getLogger()
 
-def run(config, commands, in_windows=False, layout=None):
+def run(config, commands, in_windows=False, layout=None, dry_run=False):
     layout_cmds = None
     if layout:
         layout_cmds = config.dig('tmux', 'layout', layout)
         if not layout_cmds:
             raise RuntimeError("Config does not define layout: %s" % layout)
 
-    with TmuxSession(commands=commands, in_windows=in_windows, layout_cmds=layout_cmds) as tmux:
+    with TmuxSession(commands=commands, in_windows=in_windows, layout_cmds=layout_cmds, dry_run=dry_run) as tmux:
         tmux.attach()
 
 
 # adapted from https://github.com/spappier/tmuxssh/
 class TmuxSession(object):
 
-    def __init__(self, session_name=None, commands=tuple(), in_windows=False, layout_cmds=None):
+    def __init__(self, session_name=None, commands=tuple(), in_windows=False, layout_cmds=None, dry_run=False):
         self._session_name = session_name or 'tmux-{}'.format(os.getpid())
         self._commands = commands
         self._in_windows = in_windows
         self._layout_cmds = layout_cmds
         self._created_session = False
         self._show_errors = True
+        self._dry_run = dry_run
 
     def __enter__(self):
         if len(self._commands) == 0:
@@ -97,6 +98,9 @@ class TmuxSession(object):
     def tmux(self, *args):
         cmd = ['tmux'] + list(args)
         logger.debug(' '.join(cmd))
+        if self._dry_run:
+            return ''
+
         pipes = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         std_out, std_err = pipes.communicate()
 

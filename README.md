@@ -2,7 +2,8 @@
 
 ![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)
 
-*TL;DR: this tool = AWS cli + ssh + tmux + sshfs*
+*TL;DR: this tool =  ssh + tmux + sshfs + cloud inventory search*
+
 **Note: this is a work in progress (alpha-ish)**
 
 Just get me to my ec2 box with a simple search. Multiple matches? Just
@@ -61,7 +62,7 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
   - [x] aws
   - [ ] google cloud
   - [ ] ansible inventory
-  - [ ] new relic
+  - [x] new relic
   - [x] csv
 
 ## Installing
@@ -73,28 +74,31 @@ pip install bridgy
 
 ## Usage
 ```
-  bridgy ssh [-teauw] [-l LAYOUT] <host>...
-  bridgy list-mounts
-  bridgy mount <host>:<remotedir>
-  bridgy unmount (-a | <host>...)
-  bridgy update
+  bridgy ssh [-auwvd] [-l LAYOUT] <host>...
+  bridgy ssh [-uvd] --no-tmux <host>
+  bridgy list-mounts [-vd]
+  bridgy mount [-vd] <host>:<remotedir>
+  bridgy unmount [-vd] (-a | <host>...)
+  bridgy update [-v]
   bridgy (-h | --help)
   bridgy --version
 
 Sub-commands:
-  mount         use sshfs to mount a remote directory to an empty local directory
-  unmount       unmount one or more host sshfs mounts
-  list-mounts   show all sshfs mounts
-  update        pull the latest instance inventory from aws
+  ssh           ssh into the selected host(s)
+  mount         use sshfs to mount a remote directory to an empty local directory (linux only)
+  unmount       unmount one or more host sshfs mounts (linux only)
+  list-mounts   show all sshfs mounts (linux only)
+  update        pull the latest inventory from your cloud provider
 
 Options:
   -a        --all            Automatically use all matched hosts.
-  -e        --exact          Use exact match for given hosts (not fuzzy match).
+  -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose)
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
-  -t        --template       Use the given ssh template for logging into the ec2 instance
+  -n        --no-tmux        Ssh into a single server without tmux
   -u        --update         pull the latest instance inventory from aws then run the specified command
   -w        --windows        Use tmux windows instead of panes for each matched host.
   -h        --help           Show this screen.
+  -v        --verbose        Show debug information.
   --version                  Show version.
 
 Configuration Options are in ~/.bridgy/config.yml
