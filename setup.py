@@ -24,7 +24,8 @@ setup(
                       'boto3',
                       'placebo',
                       'python-Levenshtein',
-                      'coloredlogs'],
+                      'coloredlogs',
+                      'tabulate'],
     platforms='linux',
     keywords=['tmux', 'ssh', 'sshfs', 'aws'],
     # latest from https://pypi.python.org/pypi?%3Aaction=list_classifiers

@@ -76,7 +76,8 @@ pip install bridgy
 ```
   bridgy ssh [-auwvd] [-l LAYOUT] <host>...
   bridgy ssh [-uvd] --no-tmux <host>
-  bridgy list-mounts [-vd]
+  bridgy list-inventory
+  bridgy list-mounts
   bridgy mount [-vd] <host>:<remotedir>
   bridgy unmount [-vd] (-a | <host>...)
   bridgy update [-v]

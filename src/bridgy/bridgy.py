@@ -6,7 +6,8 @@ by tmux.
 Usage:
   bridgy ssh [-auwvd] [-l LAYOUT] <host>...
   bridgy ssh [-uvd] --no-tmux <host>
-  bridgy list-mounts [-vd]
+  bridgy list-inventory
+  bridgy list-mounts
   bridgy mount [-vd] <host>:<remotedir>
   bridgy unmount [-vd] (-a | <host>...)
   bridgy update [-v]
@@ -41,6 +42,7 @@ import os
 import logging
 import coloredlogs
 import collections
+from tabulate import tabulate
 
 from version import __version__
 from command import Ssh, Sshfs
@@ -158,6 +160,10 @@ def unmount_handler(args, config):
 
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
+def list_inventory_handler(args, config):
+    print tabulate( inventory.instances(config), headers=['Name', 'Address/Dns'])
+
+@utils.SupportedPlatforms('linux', 'windows', 'osx')
 def update_handler(args, config):
     if args['-d']:
         return
@@ -198,6 +204,7 @@ def main():
         'ssh': ssh_handler,
         'mount': mount_handler,
         'list-mounts': list_mounts_handler,
+        'list-inventory': list_inventory_handler,
         'unmount': unmount_handler,
         'update': update_handler,
     }
