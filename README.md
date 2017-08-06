@@ -7,17 +7,9 @@
 **Note: this is a work in progress (alpha-ish)**
 
 Just get me to my ec2 box with a simple search. Multiple matches? Just
-ssh into all matches in a tmux session.
+ssh into all matching instances via tmux.
 
-```
-$ python bridgy ssh awesomebox
-[?] What instances would you like to ssh into? (space to multi-select, enter to finish):
- > x dev-myawesomeboxname
-   x qa-myawesomeboxname
-   o [all]
-[opens tmux session split into panes... add -w for windows]
-
-```
+![Image](demo.gif)
 
 Have a special multi-pane layout for every system you login to? Drop it in
 the config (~/.bridgy/config.yml), reference it by name:
@@ -30,12 +22,12 @@ tmux:
       - cmd: split-window -v
         run: tail -f /var/log/messages
 ```
-...then...
+then...
 ```
 $ python bridgy ssh -l logger awesomebox
 ```
 
-Want to mount a dir on your ec2 instance locally with the same simple search?
+Want to mount a dir from your ec2 instance locally?
 
 ```
 $ python bridgy sshfs awesomebox:/appdir/
