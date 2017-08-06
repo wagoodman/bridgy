@@ -11,7 +11,7 @@ ssh into all matching instances via tmux.
 
 ![Image](demo.gif)
 
-Have a special multi-pane layout for every system you login to? Drop it in
+Have a special multi-pane tmux layout for every system you login to? Drop it in
 the config (~/.bridgy/config.yml), reference it by name:
 ```
 tmux:
