@@ -34,16 +34,16 @@ Options:
 
 Configuration Options are in ~/.bridgy/config.yml
 """
-
-from docopt import docopt
-
+from __future__ import absolute_import
 import sys
 import os
 import logging
 import coloredlogs
 import collections
 from tabulate import tabulate
+from docopt import docopt
 
+import bridgy
 from version import __version__
 from command import Ssh, Sshfs
 import inventory
@@ -79,7 +79,7 @@ def ssh_handler(args, config):
         layout = args['--layout']
 
     if args['--no-tmux']:
-        cmd = commands.values()[0]
+        cmd = list(commands.values())[0]
         if args['-d']:
             logger.debug(cmd)
         else:
@@ -161,7 +161,7 @@ def unmount_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def list_inventory_handler(args, config):
-    print tabulate( inventory.instances(config), headers=['Name', 'Address/Dns'])
+    logger.info(tabulate( inventory.instances(config), headers=['Name', 'Address/Dns']))
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def update_handler(args, config):
@@ -209,7 +209,7 @@ def main():
         'update': update_handler,
     }
 
-    for opt, handler in opts.items():
+    for opt, handler in list(opts.items()):
         if args[opt]:
             try:
                 handler(args, config)

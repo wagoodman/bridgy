@@ -1,8 +1,8 @@
-from source import InventorySource, Instance
-
 import boto3
 # TODO: remove placebo and cache manually
 import placebo
+
+from inventory.source import InventorySource, Instance
 
 class AwsInventory(InventorySource):
 
@@ -38,7 +38,7 @@ class AwsInventory(InventorySource):
 
                 # try to find the best field to match a name against
                 name = None
-                if 'Tags' in instance.keys():
+                if 'Tags' in list(instance.keys()):
                     for tagDict in instance['Tags']:
                         if tagDict['Key'] == 'Name':
                             name = tagDict['Value']

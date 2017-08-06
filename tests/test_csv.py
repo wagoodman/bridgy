@@ -1,7 +1,16 @@
-import __builtin__
+try:
+    import builtins
+    builtin_mock = 'builtins'
+except ImportError:
+    import __builtin__
+    builtin_mock = '__builtin__'
+
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 import csv
-import mock
 import pytest
 import shlex
 
@@ -17,7 +26,7 @@ devenv-pubsrv|13.14.15.16|somethingrandom3
 testenv-formsvc|17.18.19.20|somethingrandom4"""
 
 
-@mock.patch("__builtin__.open", mock.mock_open(read_data=DATA))
+@mock.patch("%s.open" % builtin_mock, mock.mock_open(read_data=DATA))
 @mock.patch("csv.DictReader")
 def test_newrelic_instances(mock_csv_reader):
     # for whatever reason mock_open is not sufficent since the DictReader will return nothing

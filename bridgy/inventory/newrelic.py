@@ -1,33 +1,37 @@
-from source import InventorySource, Instance
-
 import os
 import json
-import urllib
 import requests
+try:
+    from urllib.parse import quote_plus
+except ImportError:
+    from urllib import quote_plus
+
+
+from inventory.source import InventorySource, Instance
 
 class NewRelicInventory(InventorySource):
 
     name = 'newrelic'
     url = "https://insights-api.newrelic.com/v1/accounts/{}/query?nrql={}"
-    query = urllib.quote_plus("SELECT entityName, fullHostname, hostname, ipV4Address from NetworkSample LIMIT 999")
 
     def __init__(self, account_number, insights_query_api_key, data_path):
         self.account_number = account_number
         self.insights_query_api_key = insights_query_api_key
         self.data_file = os.path.join(data_path, '%s.json' % str(account_number))
+        self.query = quote_plus("SELECT entityName, fullHostname, hostname, ipV4Address from NetworkSample LIMIT 999")
 
     def update(self):
         headers = {'X-Query-Key': self.insights_query_api_key,
                    'Accept': 'application/json'}
-        response = requests.get(NewRelicInventory.url.format(self.account_number, NewRelicInventory.query),
+        response = requests.get(NewRelicInventory.url.format(self.account_number, self.query),
                                 headers=headers)
 
-        with open(self.data_file, 'wb') as data_file:
+        with open(self.data_file, 'w') as data_file:
             data_file.write(response.text)
 
     def instances(self):
         instances = set()
-        with open(self.data_file, 'rb') as data_file:
+        with open(self.data_file, 'r') as data_file:
             data = json.load(data_file)
 
         for results_dict in data['results']:

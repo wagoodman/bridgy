@@ -1,8 +1,12 @@
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 import collections
 import subprocess
 import pytest
 import shlex
-import mock
 import os
 
 from bridgy.tmux import TmuxSession

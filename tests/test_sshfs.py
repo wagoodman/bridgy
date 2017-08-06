@@ -1,7 +1,20 @@
-import __builtin__
+try:
+    import builtins
+    builtin_module = builtins
+except ImportError:
+    import __builtin__
+    builtin_module = __builtin__
 
-from StringIO import StringIO
-import mock
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 import pytest
 import shlex
 import re
@@ -12,7 +25,7 @@ from bridgy.inventory import Instance
 from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost, BadRemoteDir
 from bridgy.config import Config
 
-MTAB = """\
+MTAB = u"""\
 ysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
 proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
 udev /dev devtmpfs rw,nosuid,relatime,size=16359216k,nr_inodes=4089804,mode=755 0 0
@@ -82,7 +95,7 @@ def test_sshfs_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir, mo
     assert mock_rmdir.called
 
 @mock.patch.object(os, 'listdir')
-@mock.patch.object(__builtin__, 'open')
+@mock.patch.object(builtin_module, 'open')
 def test_sshfs_mounts(mock_open, mock_ls):
     mock_open.return_value = StringIO(MTAB)
     mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']

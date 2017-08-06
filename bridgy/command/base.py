@@ -1,7 +1,8 @@
 import abc
-from error import *
 
-class BaseCommand:
+from command.error import *
+
+class BaseCommand(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, config, instance):

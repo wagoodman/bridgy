@@ -1,8 +1,8 @@
 import os
 import sys
 import logging
-import base
-from error import *
+from command import base
+from command.error import *
 
 logger = logging.getLogger(__name__)
 

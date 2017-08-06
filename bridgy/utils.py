@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from sys import platform as _platform
 import collections
 import inquirer
@@ -5,7 +6,7 @@ import logging
 import sys
 import os
 
-import inventory
+from bridgy import inventory
 
 logger = logging.getLogger()
 
@@ -69,13 +70,13 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
     if multiple:
         q = inquirer.Checkbox('instance',
                               message="%s%s%s (space to multi-select, enter to finish)" % (color.BOLD, question, color.NORMAL),
-                              choices=display_instances.keys() + ['all'],
+                              choices=list(display_instances.keys()) + ['all'],
                               # default='all'
                               )
     else:
         q = inquirer.List('instance',
                            message="%s%s%s (enter to select)" % (color.BOLD, question, color.NORMAL),
-                           choices=display_instances.keys(),
+                           choices=list(display_instances.keys()),
                            )
     questions.append(q)
 

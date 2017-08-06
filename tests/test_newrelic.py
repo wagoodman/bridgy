@@ -1,6 +1,15 @@
-import __builtin__
+try:
+    import builtins
+    builtin_mock = 'builtins'
+except ImportError:
+    import __builtin__
+    builtin_mock = '__builtin__'
 
-import mock
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 import pytest
 import shlex
 
@@ -71,7 +80,7 @@ DATA = """
 """
 
 
-@mock.patch("__builtin__.open", mock.mock_open(read_data=DATA))
+@mock.patch("%s.open" % builtin_mock, mock.mock_open(read_data=DATA))
 def test_newrelic_instances():
 
     newrelic_obj = NewRelicInventory('account_number','api_key','/tmp/dummy/path')

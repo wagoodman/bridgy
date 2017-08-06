@@ -1,0 +1,14 @@
+PyYAML
+requests
+docopt
+inquirer
+fuzzywuzzy
+boto3
+placebo
+python-Levenshtein
+coloredlogs
+tabulate
+pytest
+tox
+coverage
+mock

@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 import os
 
-from source import Instance
-from aws import AwsInventory
+from inventory.source import Instance
+from inventory.aws import AwsInventory
 # from gcp import GcpInventory
-from flatfile import CsvInventory
-from newrelic import NewRelicInventory
+from inventory.flatfile import CsvInventory
+from inventory.newrelic import NewRelicInventory
 
 SOURCES = {
     'aws': AwsInventory,
@@ -12,7 +13,6 @@ SOURCES = {
     'csv': CsvInventory,
     'newrelic': NewRelicInventory,
 }
-
 
 def inventory(config):
     source = config.dig('inventory', 'source')

@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 from yaml.representer import Representer
 import collections
 import logging
 import yaml
 import os
 
-import inventory
+from bridgy import inventory
 
 CONFIG_TEMPLATE = """
 # what source should be used as an inventory source
@@ -91,7 +92,7 @@ class Config(object):
                 os.mkdir(parent_dir)
             os.mkdir(inventory_cache)
 
-        for source in inventory.SOURCES.keys():
+        for source in list(inventory.SOURCES.keys()):
             source_path = os.path.join(inventory_cache, source)
             if not os.path.exists(source_path):
                 os.mkdir(source_path)
@@ -101,7 +102,7 @@ class Config(object):
             os.mkdir(mount_path)
 
     def inventoryDir(self, source):
-        if source not in inventory.SOURCES.keys():
+        if source not in list(inventory.SOURCES.keys()):
             raise RuntimeError(
                 "Unexpected inventory source: %s" % repr(source))
         return os.path.join(os.path.expanduser(self.__inventory),

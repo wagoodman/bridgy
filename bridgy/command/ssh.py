@@ -1,4 +1,4 @@
-import base
+from command import base
 
 class Ssh(base.BaseCommand):
     @property

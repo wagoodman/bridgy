@@ -4,9 +4,9 @@
 # import pytest
 # import shlex
 #
-# from bridgy.inventory import Instance
-# from bridgy.inventory.aws import AwsInventory
-# from bridgy.config import Config
+# from .inventory import Instance
+# from .inventory.aws import AwsInventory
+# from .config import Config
 #
 # DATA = """
 # {
