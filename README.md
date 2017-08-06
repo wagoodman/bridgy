@@ -30,7 +30,7 @@ $ python bridgy ssh -l logger awesomebox
 Want to mount a dir from your ec2 instance locally?
 
 ```
-$ python bridgy sshfs awesomebox:/appdir/
+$ python bridgy mount awesomebox:/appdir
 [?] What instances would you like to have mounted? (enter to select):
  > o dev-myawesomeboxname
    o qa-myawesomeboxname
