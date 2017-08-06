@@ -80,8 +80,9 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
                            )
     questions.append(q)
 
+    answers = None
     try:
-        answers = inquirer.prompt(questions)
+        answers = inquirer.prompt(questions, raise_keyboard_interrupt=True)
     except KeyboardInterrupt:
         logger.error("Cancelled by user")
         sys.exit(1)

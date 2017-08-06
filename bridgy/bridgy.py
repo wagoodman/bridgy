@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """bridgy
 SSH + TMUX + SSHFS + CLOUD INVENTORY SEARCH.
 Fuzzy search for one or more systems then ssh into all matches, organized
