@@ -65,7 +65,7 @@ class Sshfs(base.BaseCommand):
         if rc == 0:
             return True
 
-        logger.error("Failed to mount instance {} at {}".format(self.instance, self.mountpoint))
+        logger.error("Failed to mount instance {} ({}) at {}".format(self.instance.name, self.instance.address, self.mountpoint))
         os.rmdir(self.mountpoint)
         return False
 

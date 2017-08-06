@@ -4,12 +4,12 @@ Fuzzy search for one or more systems then ssh into all matches, organized
 by tmux.
 
 Usage:
-  bridgy ssh [-auwvd] [-l LAYOUT] <host>...
-  bridgy ssh [-uvd] --no-tmux <host>
+  bridgy ssh [-aduvw] [-l LAYOUT] <host>...
+  bridgy ssh [-duv] --no-tmux <host>
   bridgy list-inventory
   bridgy list-mounts
-  bridgy mount [-vd] <host>:<remotedir>
-  bridgy unmount [-vd] (-a | <host>...)
+  bridgy mount [-duv] <host>:<remotedir>
+  bridgy unmount [-dv] (-a | <host>...)
   bridgy update [-v]
   bridgy (-h | --help)
   bridgy --version
@@ -53,9 +53,10 @@ import utils
 
 logger = logging.getLogger()
 
+
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def ssh_handler(args, config):
-    if config.dig('inventory', 'update_at_start'):
+    if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
 
     if args ['--no-tmux']:
@@ -91,9 +92,10 @@ def ssh_handler(args, config):
             logger.error('Tmux not installed.')
             sys.exit(1)
 
+
 @utils.SupportedPlatforms('linux')
 def mount_handler(args, config):
-    if config.dig('inventory', 'update_at_start'):
+    if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
 
     fields = args['<host>:<remotedir>'].split(':')
@@ -163,11 +165,13 @@ def unmount_handler(args, config):
 def list_inventory_handler(args, config):
     logger.info(tabulate( inventory.instances(config), headers=['Name', 'Address/Dns']))
 
+
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def update_handler(args, config):
     if args['-d']:
         return
-    logger.info("Updating inventory...")
+
+    logger.warn("Updating inventory...")
     inventory_obj = inventory.inventory(config)
     inventory_obj.update()
 
