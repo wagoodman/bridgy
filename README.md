@@ -66,12 +66,12 @@ pip install bridgy
 
 ## Usage
 ```
-  bridgy ssh [-auwvd] [-l LAYOUT] <host>...
-  bridgy ssh [-uvd] --no-tmux <host>
+  bridgy ssh [-aduvw] [-l LAYOUT] <host>...
+  bridgy ssh [-duv] --no-tmux <host>
   bridgy list-inventory
   bridgy list-mounts
-  bridgy mount [-vd] <host>:<remotedir>
-  bridgy unmount [-vd] (-a | <host>...)
+  bridgy mount [-duv] <host>:<remotedir>
+  bridgy unmount [-dv] (-a | <host>...)
   bridgy update [-v]
   bridgy (-h | --help)
   bridgy --version
