@@ -14,17 +14,23 @@ class NewRelicInventory(InventorySource):
     name = 'newrelic'
     url = "https://insights-api.newrelic.com/v1/accounts/{}/query?nrql={}"
 
-    def __init__(self, account_number, insights_query_api_key, data_path):
+    def __init__(self, account_number, insights_query_api_key, data_path, proxies=None):
         self.account_number = account_number
         self.insights_query_api_key = insights_query_api_key
         self.data_file = os.path.join(data_path, '%s.json' % str(account_number))
         self.query = quote_plus("SELECT entityName, fullHostname, hostname, ipV4Address from NetworkSample LIMIT 999")
+        if proxies:
+            self.proxies = proxies
+        else:
+            self.proxies = {}
 
     def update(self):
         headers = {'X-Query-Key': self.insights_query_api_key,
                    'Accept': 'application/json'}
+
         response = requests.get(NewRelicInventory.url.format(self.account_number, self.query),
-                                headers=headers)
+                                headers=headers,
+                                proxies=self.proxies)
 
         with open(self.data_file, 'w') as data_file:
             data_file.write(response.text)

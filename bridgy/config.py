@@ -12,6 +12,8 @@ CONFIG_TEMPLATE = """
 inventory:
   source: csv
   update_at_start: false
+#  http_proxy: someurl
+#  https_proxy: someurl
 
 # if you are using a csv file
 csv:
