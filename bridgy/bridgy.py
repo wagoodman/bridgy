@@ -60,7 +60,7 @@ def ssh_handler(args, config):
     if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
 
-    if args ['--no-tmux']:
+    if args ['--no-tmux'] or config.dig('ssh', 'no-tmux'):
         question = "What instance would you like to ssh into?"
         targets = utils.prompt_targets(question, targets=args['<host>'], config=config, multiple=False)
     else:
@@ -80,7 +80,7 @@ def ssh_handler(args, config):
     if args['--layout']:
         layout = args['--layout']
 
-    if args['--no-tmux']:
+    if args['--no-tmux'] or config.dig('ssh', 'no-tmux'):
         cmd = list(commands.values())[0]
         if args['-d']:
             logger.debug(cmd)
