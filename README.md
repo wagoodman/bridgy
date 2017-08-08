@@ -59,9 +59,16 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 
 ## Installing
 
+**Linux**
 ```
 sudo apt install -y sshfs tmux
-pip install bridgy
+sudo pip install bridgy
+```
+
+**OSX**
+```
+brew install tmux
+sudo pip install bridgy --ignore-installed six
 ```
 
 ## Usage
