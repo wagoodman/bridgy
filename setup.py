@@ -23,7 +23,6 @@ setuptools.setup(
                       'fuzzywuzzy',
                       'boto3',
                       'placebo',
-                      'python-Levenshtein',
                       'coloredlogs',
                       'tabulate'],
     platforms='linux',

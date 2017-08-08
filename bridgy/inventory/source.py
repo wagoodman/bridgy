@@ -1,6 +1,14 @@
 import abc
+import warnings
 import collections
-from fuzzywuzzy import fuzz
+
+with warnings.catch_warnings():
+    # Thiw warns about using the slow implementation of SequenceMatcher
+    # instead of the python-Levenshtein module, which requires compilation.
+    # I'd prefer for users tp simply use this tool without the need to
+    # compile since the search space is probably fairly small
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from fuzzywuzzy import fuzz
 
 Instance = collections.namedtuple("Instance", "name address")
 
