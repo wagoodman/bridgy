@@ -1,7 +1,11 @@
 import os
 import csv
+import sys
+import logging
 
 from inventory.source import InventorySource, Instance
+
+logger = logging.getLogger()
 
 class CsvInventory(InventorySource):
 
@@ -16,9 +20,12 @@ class CsvInventory(InventorySource):
 
     def instances(self):
         instances = set()
-        with open(self.csv_path, 'r') as csv_file:
-            reader = csv.DictReader(csv_file, fieldnames=self.fields, delimiter=self.delimiter)
-            for row in reader:
-                instances.add(Instance(row['name'].strip(), row['address'].strip()))
-
+        try:
+            with open(self.csv_path, 'r') as csv_file:
+                reader = csv.DictReader(csv_file, fieldnames=self.fields, delimiter=self.delimiter)
+                for row in reader:
+                    instances.add(Instance(row['name'].strip(), row['address'].strip()))
+        except IOError as ex:
+            logger.error("Unable to read inventory: %s" % ex)
+            sys.exit(1)
         return list(instances)

@@ -184,8 +184,12 @@ def main():
         logger.error("Do not run this as root")
         sys.exit(1)
 
-    version = 'bridgy %s' % __version__
+    config = cfg.Config()
+    config.create()
+    config.read()
+    config.verify()
 
+    version = 'bridgy %s' % __version__
     args = docopt(__doc__, version=version)
 
     if args['-v']:
@@ -199,11 +203,6 @@ def main():
     if args['--version']:
         logger.info(version)
         sys.exit(0)
-
-    config = cfg.Config()
-    config.create()
-    config.read()
-    config.verify()
 
     opts = {
         'ssh': ssh_handler,

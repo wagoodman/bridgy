@@ -3,61 +3,99 @@ from yaml.representer import Representer
 import collections
 import logging
 import yaml
+import sys
 import os
 
 from bridgy import inventory
 
+logger = logging.getLogger()
+
 CONFIG_TEMPLATE = """
-# what source should be used as an inventory source
+# Bridgy uses an inventory of hostnames and addresses as a source to search against and ssh into.
 inventory:
-  source: csv
-  update_at_start: false
-#  http_proxy: someurl
-#  https_proxy: someurl
+#   # Supported values are: csv, newrelic, aws
+#   source: csv
+#
+#   # Attempts to pull the latest inventory when running any bridgy command (optional)
+#   update_at_start: false
+#
+#   # If you need to fetch your inventory from behind a proxy bridgy will first check for http_proxy and https_proxy
+#   # keys from the config, then check the environment for the same keys. (optional)
+#   http_proxy: someurl
+#   https_proxy: someurl
+#
+#   # Tmux is automatically used to wrap all ssh sessions, specify otherwise here (optional)
+#   no-tmux: true
 
-# if you are using a csv file
+# All inventory parameters for a CSV source
 csv:
-  name: example.csv
-  # requires at least name and address
-  fields: name, address, random
-  delimiter: '|'
+#   # Name of the inventory CSV placed in ~/.bridgy/inventory/csv
+#   name: example.csv
+#
+#   # These are the csv column names, specify at least 'name' and 'address'
+#   fields: name, address, random
+#
+#   # Optional. Defaults to ','
+#   delimiter: '|'
 
-# all aws inventory configuration
+# All inventory parameters to support querying AWS
 aws:
-  access_key_id: ACCESS_KEY
-  secret_access_key: SECRET_KEY
-  session_token: SESSION_TOKEN
-  region: us-west-2
+#   access_key_id: ACCESS_KEY
+#   secret_access_key: SECRET_KEY
+#   session_token: SESSION_TOKEN
+#   region: us-west-2
 
-# all newrelic inventory configuration
+# All inventory parameters to support querying AWS
 newrelic:
-  account_number: ACCOUNT_NUMBER
-  insights_query_api_key: API_KEY
+#   account_number: ACCOUNT_NUMBER
+#   insights_query_api_key: API_KEY
 
-# define ssh behavior and preferences
+# All SSH connectivity configuration
 ssh:
-  user: ubuntu
-  options: -C -o ServerAliveInterval=255
-  command: sudo -i su - another_user -s /bin/bash
+#   # User to use when SSHing into a host (optional)
+#   user: johnybgoode
+#
+#   # Any valid cli options you would specify to SSH (optional)
+#   options: -C -o ForwardAgent=yes -o FingerprintHash=sha256 -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
+#
+#   # Run a command upon logging into any host (optional)
+#   command: sudo -i su - another_user -s /bin/bash
 
-# if you need to connect to aws hosts via a bastion, then
-# provide all connectivity information here
+# If you need to connect to aws hosts via a bastion, then provide all connectivity information here
 bastion:
-  user: ubuntu
-  address: zest
-  options: -C -o ServerAliveInterval=255
+#   # User to use when SSHing into the bastion host (optional)
+#   user: johnybgoode
+#
+#   # Address of the bastion host
+#   address: zest
+#
+#   # Any valid cli options you would specify to SSH (optional)
+#   options: -C -o ServerAliveInterval=255 -o FingerprintHash=sha256 -o ForwardAgent=yes -o TCPKeepAlive=yes
 
-# define tmux layouts and (optional) canned commands
+
+# This specifies any SSHFS options for mounting remote directories
+sshfs:
+#   # any -o mount option that you would specify to sshfs (optional)
+#   options: auto_cache,reconnect,no_readahead
+
 tmux:
+
+  # You can make multiple panes to a single host by specifying a layout definition. Simply
+  # define each tmux command to run and an optional command to run in that pane.
+  # Use these layouts by name with the -l cli option (bridgy ssh -l somename host...)
   layout:
-    # bridgy ssh -l example host...
-    example:
-      - cmd: split-window -h
-        run: echo "first split" && bash
-      - cmd: split-window -h
-        run: echo "second split" && bash
-      - cmd: split-window -v
-        run: echo "third split" && bash
+  # an example layout:
+
+  #  somename:
+  #  - cmd: split-window -h
+  #    run: echo "first split" && bash
+  #  - cmd: split-window -h
+  #    run: echo "second split" && bash
+  #  - cmd: split-window -v
+  #     run: echo "third split" && bash
+
+  #  someothername:
+  #  - cmd: split-window -h
 """
 
 
@@ -74,8 +112,12 @@ class Config(object):
         # ensure yaml uses a defaultdict(str)
         yaml.add_representer(collections.defaultdict,
                              Representer.represent_str)
-        with open(os.path.expanduser(self.__path), 'r') as fh:
-            self.__conf = yaml.load(fh)
+        try:
+            with open(os.path.expanduser(self.__path), 'r') as fh:
+                self.__conf = yaml.load(fh)
+        except Exception as ex:
+            logger.error("Unable to read config (%s): %s" % (self.__path, ex))
+            sys.exit(1)
 
     def create(self):
         config_file = os.path.expanduser(self.__path)
@@ -114,8 +156,15 @@ class Config(object):
     def mount_root_dir(self):
         return os.path.expanduser(self.__mount)
 
-    # TODO
-    def verify(self): pass
+    def verify(self):
+        source = self.dig('inventory', 'source')
+        if source == None:
+            logger.error("No inventory source specified (%s):" % self.__path)
+            sys.exit(1)
+
+        if self.dig(source) == None:
+            logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.__path))
+            sys.exit(1)
 
     def __iter__(self):
         return iter(self.__conf)
@@ -124,7 +173,10 @@ class Config(object):
         def __dig(d, *keys):
             try:
                 if len(keys) == 1:
-                    return d[keys[0]]
+                    try:
+                        return d[keys[0]]
+                    except TypeError:
+                        return None
                 return __dig(d[keys[0]], *keys[1:])
             except KeyError:
                 return None
