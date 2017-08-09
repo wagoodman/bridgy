@@ -56,6 +56,7 @@ ssh:
 #   user: johnybgoode
 #
 #   # Any valid cli options you would specify to SSH (optional)
+#   # Note: these options are not applied to sshfs
 #   options: -C -o ForwardAgent=yes -o FingerprintHash=sha256 -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
 #
 #   # Run a command upon logging into any host (optional)
@@ -75,8 +76,9 @@ bastion:
 
 # This specifies any SSHFS options for mounting remote directories
 sshfs:
-#   # any -o mount option that you would specify to sshfs (optional)
-#   options: auto_cache,reconnect,no_readahead
+#   # Any sshfs option that you would specify to sshfs (optional)
+#   options: -o auto_cache,reconnect,no_readahead -C TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
+#
 
 tmux:
 

@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-from command import base
 from command.error import *
 
 logger = logging.getLogger(__name__)
@@ -10,25 +9,61 @@ def run(cmd):
     logger.debug(cmd)
     return os.system(cmd)
 
-class Sshfs(base.BaseCommand):
+class Sshfs(object):
+
     def __init__(self, config, instance, remotedir=None, dry_run=False):
-        super(self.__class__, self).__init__(config, instance)
+        if not hasattr(config, '__getitem__'):
+            raise BadConfigError
+        if not isinstance(instance, tuple):
+            raise BadInstanceError
+
+        self.config = config
+        self.instance = instance
         self.remotedir = remotedir
         self.dry_run = dry_run
 
     @property
-    def command(self):
-        cmd = 'sshfs {sshoptions} {destination}:{remotedir} {mountpoint} {mountoptions}'
+    def destination(self):
+        if self.config.dig('ssh', 'user'):
+            return '{user}@{host}'.format(user=self.config.dig('ssh', 'user'),
+                                          host=self.instance.address)
+        else:
+            return self.instance.address
 
-        mountoptions = ''
-        if self.config.dig('sshfs','options'):
-            mountoptions = '-o%s'%self.config.dig('sshfs','options')
+    @property
+    def options(self):
+        bastion = ''
+        options = ''
+
+        if 'bastion' in self.config:
+            if not self.config.dig('bastion', 'address'):
+                raise MissingBastionHost
+
+            # build a destination from possible config combinations
+            if self.config.dig('bastion', 'user'):
+                destination = '{user}@{host}'.format(user=self.config.dig('bastion', 'user'),
+                                                     host=self.config.dig('bastion', 'address'))
+            else:
+                destination = self.config.dig('bastion', 'address')
+
+            bastion_options = self.config.dig('bastion', 'options') or ''
+
+            template = "-o ProxyCommand='ssh {options} -W %h:%p {destination}'"
+            bastion = template.format(options=bastion_options,
+                                      destination=destination)
+
+        options = self.config.dig('sshfs', 'options') or ''
+
+        return '{} {}'.format(bastion, options)
+
+    @property
+    def command(self):
+        cmd = 'sshfs {options} {destination}:{remotedir} {mountpoint}'
 
         return cmd.format(destination=self.destination,
                           remotedir=self.remotedir,
                           mountpoint=self.mountpoint,
-                          sshoptions=self.options,
-                          mountoptions=mountoptions)
+                          options=self.options)
 
     @classmethod
     def mounts(cls, mount_root_dir):

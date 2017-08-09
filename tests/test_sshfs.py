@@ -186,6 +186,9 @@ def test_sshfs_options():
     config = Config({
         'ssh': {
             'user': 'username',
+            'options': '-o ForwardAgent=yes'
+        },
+        'sshfs': {
             'options': '-C -o ServerAliveInterval=255'
         }
     })
@@ -196,7 +199,7 @@ def test_sshfs_options():
 
 def test_sshfs_command_no_user():
     config = Config({
-        'ssh': {
+        'sshfs': {
             'options': '-C -o ServerAliveInterval=255'
         }
     })
@@ -232,13 +235,13 @@ def test_sshfs_command_bastion_user():
 def test_sshfs_command_mountoptions():
     config = Config({
         'sshfs': {
-            'options': 'auto_cache,reconnect,defer_permissions,noappledouble,nolocalcaches,no_readahead'
+            'options': '-o auto_cache,reconnect,defer_permissions,noappledouble,nolocalcaches,no_readahead'
         }
     })
     remotedir = '/tmp'
     sshObj = Sshfs(config, instance, remotedir)
     mount_arg = '%s/%s@%s'%(config.mount_root_dir, instance.name, instance.address)
-    assert_command_results(sshObj.command, "sshfs address.com:/tmp %s -o%s" % (mount_arg, config.dig('sshfs', 'options')))
+    assert_command_results(sshObj.command, "sshfs %s address.com:/tmp %s" % (config.dig('sshfs', 'options'), mount_arg))
 
 def test_sshfs_command_bastion_missing_address():
     config = Config({
