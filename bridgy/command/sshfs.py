@@ -72,7 +72,7 @@ class Sshfs(object):
 
         if _platform == 'osx':
             lines = [s.split() for s in os.popen("df -Ph").read().splitlines()][1:]
-            system_mounts = set([mp for fs, size, used, avail, puse, mounted, mp in lines if ':' in fs])
+            system_mounts = set([fields[-1] for fields in lines if ':' in fields[0]])
         elif _platform == 'linux':
             lines = [line.strip("\n").split(" ") for line in open("/etc/mtab", "r").readlines()]
             system_mounts = set([mp for src, mp, fs, opt, p1, p2 in lines if fs == "fuse.sshfs"])
