@@ -77,6 +77,8 @@ bastion:
 # This specifies any SSHFS options for mounting remote directories
 sshfs:
    # Any sshfs option that you would specify to sshfs (optional)
+   # Tip: if you need to be another user on the remote system you can do so via sudo:
+   # options: -o sftp_server="/usr/bin/sudo /usr/lib/openssh/sftp-server"
    options: -o auto_cache,reconnect,no_readahead -C -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
 
 
