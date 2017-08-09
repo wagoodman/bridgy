@@ -122,7 +122,15 @@ class Sshfs(object):
             logger.debug(self.command)
             return
 
-        if os.path.exists(mountpoint) and run("fusermount -u %s" % mountpoint) == 0:
+        _platform = platform()
+        if _platform == 'osx':
+            umount_cmd = 'umount'
+        elif _platform == 'linux':
+            umount_cmd = 'fusermount -u'
+        else:
+            raise UnsupportedPlatform
+
+        if os.path.exists(mountpoint) and run("%s %s" % (umount_cmd, mountpoint)) == 0:
             os.rmdir(mountpoint)
             return True
         return False

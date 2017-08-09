@@ -19,15 +19,14 @@ class color:
 class UnsupportedPlatform(Exception): pass
 
 def platform():
-    from sys import platform as _platform
 
-    if 'linux' in _platform:
+    if 'linux' in sys.platform:
         return 'linux'
-    elif 'darwin' in  _platform:
+    elif 'darwin' in  sys.platform:
         return 'osx'
-    elif 'win' in _platform:
+    elif 'win' in sys.platform:
         return 'windows'
-    return _platform
+    return sys.platform
 
 class SupportedPlatforms(object):
     def __init__(self, *platforms):

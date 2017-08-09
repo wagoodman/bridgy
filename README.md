@@ -85,9 +85,9 @@ sudo pip install bridgy --ignore-installed six
 
 Sub-commands:
   ssh           ssh into the selected host(s)
-  mount         use sshfs to mount a remote directory to an empty local directory (linux only)
-  unmount       unmount one or more host sshfs mounts (linux only)
-  list-mounts   show all sshfs mounts (linux only)
+  mount         use sshfs to mount a remote directory to an empty local directory
+  unmount       unmount one or more host sshfs mounts
+  list-mounts   show all sshfs mounts
   update        pull the latest inventory from your cloud provider
 
 Options:

@@ -17,9 +17,9 @@ Usage:
 
 Sub-commands:
   ssh           ssh into the selected host(s)
-  mount         use sshfs to mount a remote directory to an empty local directory (linux only)
-  unmount       unmount one or more host sshfs mounts (linux only)
-  list-mounts   show all sshfs mounts (linux only)
+  mount         use sshfs to mount a remote directory to an empty local directory
+  unmount       unmount one or more host sshfs mounts
+  list-mounts   show all sshfs mounts
   update        pull the latest inventory from your cloud provider
 
 Options:
@@ -145,7 +145,7 @@ def ssh_handler(args, config):
             sys.exit(1)
 
 
-@utils.SupportedPlatforms('linux')
+@utils.SupportedPlatforms('linux', 'osx')
 def mount_handler(args, config):
     if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
@@ -176,7 +176,7 @@ def mount_handler(args, config):
                 logger.error("Unable to mount %s" % sshfsObj.instance.name)
 
 
-@utils.SupportedPlatforms('linux')
+@utils.SupportedPlatforms('linux', 'osx')
 def list_mounts_handler(args, config):
     if args['-d']:
         return
@@ -185,7 +185,7 @@ def list_mounts_handler(args, config):
         logger.info(mountpoint)
 
 
-@utils.SupportedPlatforms('linux')
+@utils.SupportedPlatforms('linux', 'osx')
 def unmount_handler(args, config):
     question = "What instances would you like to have unmounted?"
 
