@@ -44,7 +44,6 @@ import collections
 from tabulate import tabulate
 from docopt import docopt
 
-import bridgy
 from version import __version__
 from command import Ssh, Sshfs
 import inventory
@@ -55,6 +54,58 @@ import utils
 logger = logging.getLogger()
 
 
+def prompt_targets(question, targets=None, instances=None, multiple=True, config=None):
+    if targets == None and instances == None or targets != None and instances != None:
+        raise RuntimeError("Provide exactly one of either 'targets' or 'instances'")
+
+    if targets:
+        instances = inventory.search(config, targets)
+
+    if len(instances) == 0:
+        return []
+
+    if len(instances) == 1:
+        return instances
+
+    display_instances = collections.OrderedDict()
+    for instance in sorted(instances):
+        display = "%-55s (%s)" % instance
+        display_instances[display] = instance
+
+    questions = []
+
+    if multiple:
+        q = inquirer.Checkbox('instance',
+                              message="%s%s%s (space to multi-select, enter to finish)" % (color.BOLD, question, color.NORMAL),
+                              choices=list(display_instances.keys()) + ['all'],
+                              # default='all'
+                              )
+    else:
+        q = inquirer.List('instance',
+                           message="%s%s%s (enter to select)" % (color.BOLD, question, color.NORMAL),
+                           choices=list(display_instances.keys()),
+                           )
+    questions.append(q)
+
+    answers = None
+    try:
+        answers = inquirer.prompt(questions, raise_keyboard_interrupt=True)
+    except KeyboardInterrupt:
+        logger.error("Cancelled by user")
+        sys.exit(1)
+
+    if 'all' in answers["instance"]:
+        selected_hosts = instances
+    else:
+        selected_hosts = []
+        if not multiple:
+            answers["instance"] = [answers["instance"]]
+        for answer in answers["instance"]:
+            selected_hosts.append(display_instances[answer])
+
+    return selected_hosts
+
+
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def ssh_handler(args, config):
     if config.dig('inventory', 'update_at_start') or args['-u']:
@@ -62,10 +113,10 @@ def ssh_handler(args, config):
 
     if args ['--no-tmux'] or config.dig('ssh', 'no-tmux'):
         question = "What instance would you like to ssh into?"
-        targets = utils.prompt_targets(question, targets=args['<host>'], config=config, multiple=False)
+        targets = prompt_targets(question, targets=args['<host>'], config=config, multiple=False)
     else:
         question = "What instances would you like to ssh into?"
-        targets = utils.prompt_targets(question, targets=args['<host>'], config=config)
+        targets = prompt_targets(question, targets=args['<host>'], config=config)
 
     if len(targets) == 0:
         logger.info("No matching instances found")
@@ -111,7 +162,7 @@ def mount_handler(args, config):
     unmounted_targets = [obj.instance for obj in sshfs_objs if not obj.is_mounted]
 
     question = "What instances would you like to have mounted?"
-    target_instances = utils.prompt_targets(question, instances=unmounted_targets, multiple=False, config=config)
+    target_instances = prompt_targets(question, instances=unmounted_targets, multiple=False, config=config)
 
     if len(target_instances) == 0:
         logger.info("No matching instances found")
@@ -148,7 +199,7 @@ def unmount_handler(args, config):
         instances = inventory.search(config, desired_targets)
         sshfs_objs = [Sshfs(config, instance, dry_run=args['-d']) for instance in instances]
         mounted_targets = [obj.instance for obj in sshfs_objs if obj.is_mounted]
-        target_instances = utils.prompt_targets(question, instances=mounted_targets, multiple=False, config=config)
+        target_instances = prompt_targets(question, instances=mounted_targets, multiple=False, config=config)
 
     if len(target_instances) == 0:
         logger.info("No matching mounts found")

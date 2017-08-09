@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 from command.error import *
+from utils import platform, UnsupportedPlatform
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +68,17 @@ class Sshfs(object):
 
     @classmethod
     def mounts(cls, mount_root_dir):
-        lines = [line.strip("\n").split(" ") for line in open("/etc/mtab", "r").readlines()]
-        system_mounts = set([mp for src, mp, fs, opt, p1, p2 in lines if fs == "fuse.sshfs"])
+        _platform = platform()
+
+        if _platform == 'osx':
+            lines = [s.split() for s in os.popen("df -Ph").read().splitlines()][1:]
+            system_mounts = set([mp for fs, size, used, avail, puse, mounted, mp in lines if ':' in fs])
+        elif _platform == 'linux':
+            lines = [line.strip("\n").split(" ") for line in open("/etc/mtab", "r").readlines()]
+            system_mounts = set([mp for src, mp, fs, opt, p1, p2 in lines if fs == "fuse.sshfs"])
+        else:
+            raise UnsupportedPlatform
+
         possible_owned_mounts = set([os.path.join(mount_root_dir, d) for d in os.listdir(mount_root_dir)])
         owned_mounts = system_mounts & possible_owned_mounts
         return list(owned_mounts)
