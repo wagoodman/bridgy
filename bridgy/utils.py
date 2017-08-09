@@ -1,5 +1,3 @@
-import collections
-import inquirer
 import logging
 import sys
 import os

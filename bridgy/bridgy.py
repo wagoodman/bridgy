@@ -39,6 +39,7 @@ from __future__ import absolute_import
 import sys
 import os
 import logging
+import inquirer
 import coloredlogs
 import collections
 from tabulate import tabulate
@@ -76,13 +77,13 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
 
     if multiple:
         q = inquirer.Checkbox('instance',
-                              message="%s%s%s (space to multi-select, enter to finish)" % (color.BOLD, question, color.NORMAL),
+                              message="%s%s%s (space to multi-select, enter to finish)" % (utils.color.BOLD, question, utils.color.NORMAL),
                               choices=list(display_instances.keys()) + ['all'],
                               # default='all'
                               )
     else:
         q = inquirer.List('instance',
-                           message="%s%s%s (enter to select)" % (color.BOLD, question, color.NORMAL),
+                           message="%s%s%s (enter to select)" % (utils.color.BOLD, question, utils.color.NORMAL),
                            choices=list(display_instances.keys()),
                            )
     questions.append(q)
