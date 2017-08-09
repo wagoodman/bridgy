@@ -67,8 +67,15 @@ sudo pip install bridgy
 
 **OSX**
 ```
+brew install osxfuse
+brew install sshfs
 brew install tmux
 sudo pip install bridgy --ignore-installed six
+```
+
+**Windows**
+```
+¯\_(ツ)_/¯
 ```
 
 ## Usage

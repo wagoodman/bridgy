@@ -106,7 +106,9 @@ class TmuxSession(object):
         std_out, std_err = pipes.communicate()
 
         if pipes.returncode != 0 and self._show_errors:
-            logger.error("Tmux failed (rc:%d): %s" % (pipes.returncode, " ".join(cmd)))
+            logger.error("Tmux failed (rc:%d, error:%s): %s" % (pipes.returncode,
+                                                                repr(std_err.strip("\n").replace("\n",', ')),
+                                                                " ".join(cmd)))
 
         elif len(std_err) and self._show_errors:
             logger.error("Tmux error: %s" % std_err)
