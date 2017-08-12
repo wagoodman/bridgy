@@ -148,6 +148,8 @@ def ssh_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'osx')
 def mount_handler(args, config):
+    Sshfs.ensure_sshfs_installed()
+
     if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
 
@@ -179,6 +181,8 @@ def mount_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'osx')
 def list_mounts_handler(args, config):
+    Sshfs.ensure_sshfs_installed()
+
     if args['-d']:
         return
 
@@ -188,6 +192,8 @@ def list_mounts_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'osx')
 def unmount_handler(args, config):
+    Sshfs.ensure_sshfs_installed()
+
     question = "What instances would you like to have unmounted?"
 
     if args['-a']:

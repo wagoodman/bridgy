@@ -23,6 +23,12 @@ class Sshfs(object):
         self.remotedir = remotedir
         self.dry_run = dry_run
 
+    @staticmethod
+    def ensure_sshfs_installed():
+        if run('sshfs --version') != 0:
+            logger.error("SSHFS is not installed")
+            sys.exit(1)
+
     @property
     def destination(self):
         if self.config.dig('ssh', 'user'):

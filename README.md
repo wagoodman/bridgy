@@ -38,6 +38,33 @@ $ python bridgy mount awesomebox:/appdir
 Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 ```
 
+## Installing
+
+**Linux**
+```
+sudo apt install tmux
+sudo pip install bridgy
+
+# optionally if you would like remote mounts
+sudo apt install sshfs
+```
+
+**OSX**
+```
+sudo easy_install pip
+brew install tmux
+sudo pip install bridgy --ignore-installed six
+
+# optionally if you would like remote mounts
+brew install osxfuse
+brew install sshfs
+```
+
+**Windows**
+```
+¯\_(ツ)_/¯
+```
+
 ## Features
 
 - [x] fuzzy search ec2 instances to IP
@@ -56,27 +83,6 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
   - [ ] ansible inventory
   - [x] new relic
   - [x] csv
-
-## Installing
-
-**Linux**
-```
-sudo apt install -y sshfs tmux
-sudo pip install bridgy
-```
-
-**OSX**
-```
-brew install osxfuse
-brew install sshfs
-brew install tmux
-sudo pip install bridgy --ignore-installed six
-```
-
-**Windows**
-```
-¯\_(ツ)_/¯
-```
 
 ## Usage
 ```
