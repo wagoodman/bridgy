@@ -86,8 +86,8 @@ brew install sshfs
 
 ## Usage
 ```
-  bridgy ssh [-aduvw] [-l LAYOUT] <host>...
-  bridgy ssh [-duv] --no-tmux <host>
+  bridgy ssh [-adsuvw] [-l LAYOUT] <host>...
+  bridgy ssh [-dsuv] --no-tmux <host>
   bridgy list-inventory
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
@@ -105,10 +105,11 @@ Sub-commands:
 
 Options:
   -a        --all            Automatically use all matched hosts.
-  -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose)
+  -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
-  -n        --no-tmux        Ssh into a single server without tmux
-  -u        --update         pull the latest instance inventory from aws then run the specified command
+  -n        --no-tmux        Ssh into a single server without tmux.
+  -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
+  -u        --update         pull the latest instance inventory from aws then run the specified command.
   -w        --windows        Use tmux windows instead of panes for each matched host.
   -h        --help           Show this screen.
   -v        --verbose        Show debug information.
