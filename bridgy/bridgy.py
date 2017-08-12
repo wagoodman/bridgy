@@ -140,7 +140,6 @@ def ssh_handler(args, config):
         else:
             os.system(cmd)
     else:
-        tmux.ensure_tmux_installed()
         tmux.run(config, commands, args['-w'], layout, args['-d'], args['-s'])
 
 
@@ -248,6 +247,11 @@ def main():
 
     version = 'bridgy %s' % __version__
     args = docopt(__doc__, version=version)
+
+    if not tmux.is_installed():
+        if not args ['--no-tmux'] and not config.dig('ssh', 'no-tmux'):
+            logger.warn("Tmux not installed. Cannot support split screen.")
+        args['--no-tmux'] = True
 
     if args['-v']:
         coloredlogs.install(fmt='%(message)s', level='DEBUG')

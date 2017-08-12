@@ -19,6 +19,9 @@ inventory:
   # Attempts to pull the latest inventory when running any bridgy command (optional)
   update_at_start: true
 
+  # When matching instance names to a given input, use fuzzy search instead of partial match
+  fuzzy_search: true
+
   # If you need to fetch your inventory from behind a proxy bridgy will first check for http_proxy and https_proxy
   # keys from the config, then check the environment for the same keys. (optional)
   # http_proxy: someurl

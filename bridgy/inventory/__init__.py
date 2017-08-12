@@ -57,7 +57,11 @@ def instances(config):
     return inventory(config).instances()
 
 def search(config, targets):
-    return inventory(config).search(targets)
+    fuzzy = False
+    if config.dig('inventory', 'fuzzy_search'):
+        fuzzy = config.dig('inventory', 'fuzzy_search')
+
+    return inventory(config).search(targets, fuzzy=fuzzy)
 
 def update(config):
     inventory(config).update()

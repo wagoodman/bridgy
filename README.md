@@ -1,10 +1,8 @@
 # bridgy
 
-![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)
+![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)  **WIP/beta**
 
-*TL;DR: this tool =  ssh + tmux + sshfs + cloud inventory search*
-
-**Note: this is a work in progress (alpha-ish)**
+**TL;DR**: bridgy = ssh + tmux + sshfs + cloud inventory search
 
 Just get me to my ec2 box with a simple search. Multiple matches? Just
 ssh into all matching instances via tmux.
@@ -21,19 +19,20 @@ tmux:
       - cmd: split-window -h
       - cmd: split-window -v
         run: tail -f /var/log/messages
+      - cmd: set-window-option synchronize-panes on
 ```
 then...
 ```
 $ python bridgy ssh -l logger awesomebox
 ```
 
-Want to mount a dir from your ec2 instance locally?
+Want to remotely mount a dir from your ec2 instance over ssh locally?
 
 ```
 $ python bridgy mount awesomebox:/appdir
 [?] What instances would you like to have mounted? (enter to select):
- > o dev-myawesomeboxname
-   o qa-myawesomeboxname
+ > o dev-myawesomeboxname                   (10.10.60.220)
+   o qa-myawesomeboxname                    (10.10.63.13)
 
 Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 ```
@@ -42,20 +41,24 @@ Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
 
 **Linux**
 ```
-sudo apt install tmux
 sudo pip install bridgy
 
-# optionally if you would like remote mounts
+# optionally support sshing into multiple systems at once
+sudo apt install tmux
+
+# optionally support remote mounts
 sudo apt install sshfs
 ```
 
 **OSX**
 ```
 sudo easy_install pip
-brew install tmux
 sudo pip install bridgy --ignore-installed six
 
-# optionally if you would like remote mounts
+# optionally support sshing into multiple systems at once
+brew install tmux
+
+# optionally support remote mounts
 brew install osxfuse
 brew install sshfs
 ```
@@ -65,24 +68,26 @@ brew install sshfs
 ¯\_(ツ)_/¯
 ```
 
-## Features
+## Current features / Wish list
 
-- [x] fuzzy search ec2 instances to IP
-- [x] prompt for selecting target (matched) hosts
-- [x] multi-select from matche host options
-- [x] open multiple ec2 ssh connections via tmux (splits or tabs)
-- [x] configure tmux layouts for one or more ec2 connections
-- [ ] open ssh tunnel for remote debuggers
-- [x] seamless bastion hopping (via configuration)
-- [ ] push / pull files to and from instances (ansible? scp?)
-- [x] setup sshfs mount to a remote dir
-- [x] templating configurations for logging into systems and running commands
-- [x] supported inventory backends
-  - [x] aws
-  - [ ] google cloud
-  - [ ] ansible inventory
-  - [x] new relic
-  - [x] csv
+- [x] Fuzzy search against the inventory
+- [x] Custom inventory backends:
+  - [x] AWS
+  - [ ] GCP
+  - [ ] Ansible inventory
+  - [x] New Relic
+  - [x] CSV
+- [x] Prompt for single/multi selection for matched hosts in inventory
+- [x] Open multiple ssh connections via tmux (splits or tabs)
+- [x] Configure custom tmux layouts (via config)
+- [x] Seamless connection via bastion (via config)
+- [x] Setup sshfs mount to a remote dir
+- [x] Run custom command on login (via config)
+- [ ] Push / pull files to and from instances (ansible? scp?)
+- [ ] Ssh tunnel to hosts
+- [ ] Multiple invocations of bridgy adds to the same tmux session
+
+**(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**
 
 ## Usage
 ```

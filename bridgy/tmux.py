@@ -6,10 +6,10 @@ import subprocess
 
 logger = logging.getLogger()
 
-def ensure_tmux_installed():
-    if os.system('which tmux') != 0:
-        logger.error("Tmux is not installed")
-        sys.exit(1)
+def is_installed():
+    if os.system('which tmux >/dev/null 2>&1') == 0:
+        return True
+    return False
 
 def run(config, commands, in_windows=False, layout=None, dry_run=False, sync=False):
     layout_cmds = None
