@@ -25,7 +25,7 @@ class Sshfs(object):
 
     @staticmethod
     def ensure_sshfs_installed():
-        if run('sshfs --version') != 0:
+        if run('which sshfs') != 0:
             logger.error("SSHFS is not installed")
             sys.exit(1)
 

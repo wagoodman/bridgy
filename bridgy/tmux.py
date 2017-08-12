@@ -6,6 +6,11 @@ import subprocess
 
 logger = logging.getLogger()
 
+def ensure_tmux_installed():
+    if os.system('which tmux') != 0:
+        logger.error("Tmux is not installed")
+        sys.exit(1)
+
 def run(config, commands, in_windows=False, layout=None, dry_run=False):
     layout_cmds = None
     if layout:
@@ -102,7 +107,7 @@ class TmuxSession(object):
         if self._dry_run:
             return ''
 
-        pipes = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pipes = subprocess.Popen(shlex.split(' '.join(cmd)), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         std_out, std_err = pipes.communicate()
 
         if pipes.returncode != 0 and self._show_errors:

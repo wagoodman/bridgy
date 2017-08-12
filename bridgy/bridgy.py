@@ -139,11 +139,9 @@ def ssh_handler(args, config):
         else:
             os.system(cmd)
     else:
-        try:
-            tmux.run(config, commands, args['-w'], layout, args['-d'])
-        except EnvironmentError:
-            logger.error('Tmux not installed.')
-            sys.exit(1)
+        tmux.ensure_tmux_installed()
+        tmux.run(config, commands, args['-w'], layout, args['-d'])
+
 
 
 @utils.SupportedPlatforms('linux', 'osx')
