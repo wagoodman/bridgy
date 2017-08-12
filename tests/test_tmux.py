@@ -39,6 +39,34 @@ def test_tmux_multiple_splits(mock_proc):
         mock_proc.assert_has_calls([call])
 
 @mock.patch.object(subprocess, 'Popen')
+def test_tmux_sync_multiple_splits(mock_proc):
+    proc_obj = lambda: None
+    proc_obj.returncode = 0
+    proc_obj.communicate = lambda: ('', '')
+    mock_proc.return_value = proc_obj
+
+    commands = [('somebox-0', "ssh -o ProxyCommand='ssh  -W %h:%p ubuntu@zest'  ubuntu@devbox1"),
+                ('somebox-1', "ssh -o ProxyCommand='ssh  -W %h:%p ubuntu@zest'  ubuntu@devbox2")]
+    commands = collections.OrderedDict(commands)
+
+    session_name = 'tmux-15578'
+
+    with TmuxSession(session_name=session_name, commands=commands, sync=True) as tmux:
+        pass
+
+    calls = [mock.call(['tmux', 'new-session', '-ds', 'tmux-15578', '-n', 'remote-session', 'ssh', '-o', 'ProxyCommand=ssh  -W %h:%p ubuntu@zest', 'ubuntu@devbox1'], stderr=-1, stdout=-1),
+             mock.call(['tmux', 'select-layout', '-t', 'tmux-15578', 'tiled'], stderr=-1, stdout=-1),
+             mock.call(['tmux', 'split-window', '-t', 'tmux-15578', 'ssh', '-o', 'ProxyCommand=ssh  -W %h:%p ubuntu@zest', 'ubuntu@devbox2'], stderr=-1, stdout=-1),
+             mock.call(['tmux', 'select-layout', '-t', 'tmux-15578', 'tiled'], stderr=-1, stdout=-1),
+             mock.call(['tmux', 'set-window-option', '-t', 'tmux-15578', 'synchronize-panes', 'on'], stderr=-1, stdout=-1),
+             mock.call(['tmux', 'kill-session', '-t', 'tmux-15578'], stderr=-1, stdout=-1)]
+
+    # be sure that all calls were positivly called, and that no other calls were made
+    assert len(calls) == mock_proc.call_count
+    for call in calls:
+        mock_proc.assert_has_calls([call])
+
+@mock.patch.object(subprocess, 'Popen')
 def test_tmux_multiple_windows(mock_proc):
     proc_obj = lambda: None
     proc_obj.returncode = 0

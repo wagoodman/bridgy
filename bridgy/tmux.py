@@ -11,21 +11,21 @@ def ensure_tmux_installed():
         logger.error("Tmux is not installed")
         sys.exit(1)
 
-def run(config, commands, in_windows=False, layout=None, dry_run=False):
+def run(config, commands, in_windows=False, layout=None, dry_run=False, sync=False):
     layout_cmds = None
     if layout:
         layout_cmds = config.dig('tmux', 'layout', layout)
         if not layout_cmds:
             raise RuntimeError("Config does not define layout: %s" % layout)
 
-    with TmuxSession(commands=commands, in_windows=in_windows, layout_cmds=layout_cmds, dry_run=dry_run) as tmux:
+    with TmuxSession(commands=commands, in_windows=in_windows, layout_cmds=layout_cmds, dry_run=dry_run, sync=sync) as tmux:
         tmux.attach()
 
 
 # adapted from https://github.com/spappier/tmuxssh/
 class TmuxSession(object):
 
-    def __init__(self, session_name=None, commands=tuple(), in_windows=False, layout_cmds=None, dry_run=False):
+    def __init__(self, session_name=None, commands=tuple(), in_windows=False, layout_cmds=None, dry_run=False, sync=False):
         self._session_name = session_name or 'tmux-{}'.format(os.getpid())
         self._commands = commands
         self._in_windows = in_windows
@@ -33,6 +33,7 @@ class TmuxSession(object):
         self._created_session = False
         self._show_errors = True
         self._dry_run = dry_run
+        self._sync = sync
 
     def __enter__(self):
         if len(self._commands) == 0:
@@ -79,6 +80,9 @@ class TmuxSession(object):
                         self.split_window(command)
 
                 self.select_layout('tiled')
+
+        if self._sync:
+            self.set_window_option('synchronize-panes', 'on')
 
         return self
 
