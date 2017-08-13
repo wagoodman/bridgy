@@ -1,4 +1,4 @@
-from command.error import *
+from bridgy.command.error import *
 
 class Ssh(object):
 

@@ -36,7 +36,6 @@ Options:
 
 Configuration Options are in ~/.bridgy/config.yml
 """
-from __future__ import absolute_import
 import sys
 import os
 import logging
@@ -46,12 +45,12 @@ import collections
 from tabulate import tabulate
 from docopt import docopt
 
-from version import __version__
-from command import Ssh, Sshfs
-import inventory
-import config as cfg
-import tmux
-import utils
+from bridgy.version import __version__
+from bridgy.command import Ssh, Sshfs
+import bridgy.inventory as inventory
+import bridgy.config as cfg
+import bridgy.tmux as tmux
+import bridgy.utils as utils
 
 logger = logging.getLogger()
 

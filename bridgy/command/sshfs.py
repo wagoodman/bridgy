@@ -1,8 +1,8 @@
 import os
 import sys
 import logging
-from command.error import *
-from utils import platform, UnsupportedPlatform
+from bridgy.command.error import *
+from bridgy.utils import platform, UnsupportedPlatform
 
 logger = logging.getLogger(__name__)
 

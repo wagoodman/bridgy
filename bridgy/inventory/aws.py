@@ -2,7 +2,7 @@ import boto3
 # TODO: remove placebo and cache manually
 import placebo
 
-from inventory.source import InventorySource, Instance
+from bridgy.inventory.source import InventorySource, Instance
 
 class AwsInventory(InventorySource):
 

@@ -3,7 +3,6 @@ import glob
 import os
 
 exec(open('./bridgy/version.py').read())
-
 setuptools.setup(
     name='bridgy',
     version=__version__,
@@ -11,10 +10,9 @@ setuptools.setup(
     license=__license__,
     author=__author__,
     author_email=__email__,
-    description='Easily search your cloud inventory and use ssh + tmux + sshfs',
-    packages=setuptools.find_packages('bridgy'),
-    package_dir={'': 'bridgy'},
-    py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob('bridgy/*.py')],
+    description='Easily search your cloud inventory and integrate with ssh + tmux + sshfs',
+    packages=setuptools.find_packages(),
+    zip_safe=False,
     include_package_data=True,
     install_requires=['PyYAML',
                       'requests',
@@ -48,7 +46,7 @@ setuptools.setup(
         ],
     entry_points={
         'console_scripts': [
-            'bridgy = bridgy:main'
+            'bridgy = bridgy.main:main'
         ]
     },
 )

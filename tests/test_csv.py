@@ -28,7 +28,7 @@ testenv-formsvc|17.18.19.20|somethingrandom4"""
 
 @mock.patch("%s.open" % builtin_mock, mock.mock_open(read_data=DATA))
 @mock.patch("csv.DictReader")
-def test_newrelic_instances(mock_csv_reader):
+def test_csv_instances(mock_csv_reader):
     # for whatever reason mock_open is not sufficent since the DictReader will return nothing
     # so mocking the csv reader is necessary
     ret = []

@@ -3,7 +3,7 @@ import csv
 import sys
 import logging
 
-from inventory.source import InventorySource, Instance
+from bridgy.inventory.source import InventorySource, Instance
 
 logger = logging.getLogger()
 

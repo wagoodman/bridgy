@@ -1,11 +1,10 @@
-from __future__ import absolute_import
 import os
 
-from inventory.source import Instance
-from inventory.aws import AwsInventory
+from bridgy.inventory.source import Instance
+from bridgy.inventory.aws import AwsInventory
+from bridgy.inventory.flatfile import CsvInventory
+from bridgy.inventory.newrelic import NewRelicInventory
 # from gcp import GcpInventory
-from inventory.flatfile import CsvInventory
-from inventory.newrelic import NewRelicInventory
 
 SOURCES = {
     'aws': AwsInventory,
@@ -35,11 +34,11 @@ def inventory(config):
         proxies['https'] = os.environ['https_proxy']
 
     if source == 'aws':
-        return AwsInventory(aws_access_key_id=srcCfg['access_key_id'],
-                            aws_secret_access_key=srcCfg['secret_access_key'],
-                            aws_session_token=srcCfg['session_token'],
-                            region_name=srcCfg['region'],
-                            data_path=config.inventoryDir(AwsInventory.name))
+        return AwsInventory(access_key_id=srcCfg['access_key_id'],
+                            secret_access_key=srcCfg['secret_access_key'],
+                            session_token=srcCfg['session_token'],
+                            region=srcCfg['region'],
+                            cache_dir=config.inventoryDir(AwsInventory.name))
     if source == 'csv':
         csvPath = os.path.join(config.inventoryDir(source), srcCfg['name'])
         # TODO: make delimiter optional if missing from config

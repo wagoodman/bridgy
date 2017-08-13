@@ -6,8 +6,7 @@ try:
 except ImportError:
     from urllib import quote_plus
 
-
-from inventory.source import InventorySource, Instance
+from bridgy.inventory.source import InventorySource, Instance
 
 class NewRelicInventory(InventorySource):
 
