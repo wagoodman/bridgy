@@ -3,6 +3,7 @@ import glob
 import os
 
 exec(open('./bridgy/version.py').read())
+
 setuptools.setup(
     name='bridgy',
     version=__version__,
@@ -46,7 +47,7 @@ setuptools.setup(
         ],
     entry_points={
         'console_scripts': [
-            'bridgy = bridgy.main:main'
+            'bridgy = bridgy._main__:main'
         ]
     },
 )

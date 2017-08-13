@@ -1,3 +1,3 @@
-from ssh import Ssh
-from sshfs import Sshfs
-from error import *
+from bridgy.command.ssh import Ssh
+from bridgy.command.sshfs import Sshfs
+from bridgy.command.error import *

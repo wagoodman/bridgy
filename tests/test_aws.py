@@ -1,5 +1,3 @@
-import __builtin__
-
 import os
 import mock
 import pytest
@@ -8,6 +6,7 @@ import shlex
 from bridgy.inventory import Instance
 from bridgy.inventory.aws import AwsInventory
 from bridgy.config import Config
+
 
 def test_aws_instances():
     test_dir = os.path.dirname(os.path.abspath(__file__))

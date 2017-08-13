@@ -13,6 +13,7 @@ SOURCES = {
     'newrelic': NewRelicInventory,
 }
 
+
 def inventory(config):
     source = config.dig('inventory', 'source')
     srcCfg = config[source]
