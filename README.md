@@ -86,7 +86,7 @@ brew install sshfs
 - [ ] Push / pull files to and from instances (ansible? scp?)
 - [ ] Ssh tunnel to hosts
 - [ ] Multiple invocations of bridgy adds to the same tmux session
-- [ ] Python3 support
+- [x] Python3 support :)
 
 **(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**
 

@@ -26,9 +26,10 @@ devenv-pubsrv|13.14.15.16|somethingrandom3
 testenv-formsvc|17.18.19.20|somethingrandom4"""
 
 
-@mock.patch("%s.open" % builtin_mock, mock.mock_open(read_data=DATA))
-@mock.patch("csv.DictReader")
-def test_csv_instances(mock_csv_reader):
+def test_csv_instances(mocker):
+    mock_open = mocker.patch("%s.open" % builtin_mock, mock.mock_open(read_data=DATA))
+    mock_csv_reader = mocker.patch("csv.DictReader")
+
     # for whatever reason mock_open is not sufficent since the DictReader will return nothing
     # so mocking the csv reader is necessary
     ret = []
@@ -38,7 +39,7 @@ def test_csv_instances(mock_csv_reader):
 
     csv_obj = CsvInventory('/tmp/dummy/path', ' name,address, random ', ' | ')
     instances = csv_obj.instances()
-
+    print(instances)
     expected_instances = [Instance(name='devenv-pubsrv', address='13.14.15.16'),
                           Instance(name='testenv-pubsrv', address='1.2.3.4'),
                           Instance(name='devenv-pubsrv', address='9.10.11.12'),

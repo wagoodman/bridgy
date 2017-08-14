@@ -64,12 +64,13 @@ def test_sshfs_mount_remotedir_missing():
     with pytest.raises(BadRemoteDir):
         sshObj.mount()
 
-@mock.patch.object(os, 'listdir')
-@mock.patch('os.rmdir', side_effect=lambda x: True)
-@mock.patch('os.system', side_effect=lambda x: 0)
-@mock.patch('os.mkdir', side_effect=lambda x: True)
-@mock.patch('os.path.exists', side_effect=lambda x: False)
-def test_sshfs_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rmdir, mock_ls):
+def test_sshfs_mount_remotedir_dne(mocker):
+    mock_ls = mocker.patch.object(os, 'listdir')
+    mock_rmdir = mocker.patch('os.rmdir', side_effect=lambda x: True)
+    mock_system = mocker.patch('os.system', side_effect=lambda x: 0)
+    mock_mkdir = mocker.patch('os.mkdir', side_effect=lambda x: True)
+    mock_exists = mocker.patch('os.path.exists', side_effect=lambda x: False)
+
     mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
     config = Config({})
     sshObj = Sshfs(config, instance, remotedir='/tmp/test')
@@ -79,12 +80,13 @@ def test_sshfs_mount_remotedir_dne(mock_exists, mock_mkdir, mock_system, mock_rm
     assert mock_system.called
     assert not mock_rmdir.called
 
-@mock.patch.object(os, 'listdir')
-@mock.patch('os.rmdir', side_effect=lambda x: True)
-@mock.patch('os.system', side_effect=lambda x: 1)
-@mock.patch('os.mkdir', side_effect=lambda x: True)
-@mock.patch('os.path.exists', side_effect=lambda x: False)
-def test_sshfs_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir, mock_ls):
+def test_sshfs_mount_failed(mocker):
+    mock_ls = mocker.patch.object(os, 'listdir')
+    mock_rmdir = mocker.patch('os.rmdir', side_effect=lambda x: True)
+    mock_system = mocker.patch('os.system', side_effect=lambda x: 1)
+    mock_mkdir = mocker.patch('os.mkdir', side_effect=lambda x: True)
+    mock_exists = mocker.patch('os.path.exists', side_effect=lambda x: False)
+
     mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
     config = Config({})
     sshObj = Sshfs(config, instance, remotedir='/tmp/test')
@@ -94,9 +96,10 @@ def test_sshfs_mount_failed(mock_exists, mock_mkdir, mock_system, mock_rmdir, mo
     assert mock_system.called
     assert mock_rmdir.called
 
-@mock.patch.object(os, 'listdir')
-@mock.patch.object(builtin_module, 'open')
-def test_sshfs_mounts(mock_open, mock_ls):
+def test_sshfs_mounts(mocker):
+    mock_ls = mocker.patch.object(os, 'listdir')
+    mock_open = mocker.patch.object(builtin_module, 'open')
+
     mock_open.return_value = StringIO(MTAB)
     mock_ls.return_value = ['/home/dummy/.bridgy/mounts/baddir', '/home/dummy/.bridgy/mounts/awesomebox@devbox']
 
@@ -108,10 +111,11 @@ def test_sshfs_mounts(mock_open, mock_ls):
     assert len(result) == 1
     assert owned_mount in result
 
-@mock.patch.object(os, 'rmdir')
-@mock.patch.object(os, 'system')
-@mock.patch.object(os.path, 'exists')
-def test_sshfs_unmount_go_case(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_go_case(mocker):
+    mock_rmdir = mocker.patch.object(os, 'rmdir')
+    mock_system = mocker.patch.object(os, 'system')
+    mock_exists = mocker.patch.object(os.path, 'exists')
+
     mock_exists.return_value = True
     mock_system.return_value = 0
     mock_rmdir.return_value = True
@@ -123,10 +127,11 @@ def test_sshfs_unmount_go_case(mock_exists, mock_system, mock_rmdir):
     assert mock_rmdir.call_count == 1
     assert success == True
 
-@mock.patch.object(os, 'rmdir')
-@mock.patch.object(os, 'system')
-@mock.patch.object(os.path, 'exists')
-def test_sshfs_unmount_mountpoint_dne(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_mountpoint_dne(mocker):
+    mock_rmdir = mocker.patch.object(os, 'rmdir')
+    mock_system = mocker.patch.object(os, 'system')
+    mock_exists = mocker.patch.object(os.path, 'exists')
+
     mock_exists.return_value = False
     mock_system.return_value = 0
     mock_rmdir.return_value = True
@@ -138,10 +143,11 @@ def test_sshfs_unmount_mountpoint_dne(mock_exists, mock_system, mock_rmdir):
     assert mock_rmdir.call_count == 0
     assert success == False
 
-@mock.patch.object(os, 'rmdir')
-@mock.patch.object(os, 'system')
-@mock.patch.object(os.path, 'exists')
-def test_sshfs_unmount_fuse_failure(mock_exists, mock_system, mock_rmdir):
+def test_sshfs_unmount_fuse_failure(mocker):
+    mock_rmdir = mocker.patch.object(os, 'rmdir')
+    mock_system = mocker.patch.object(os, 'system')
+    mock_exists = mocker.patch.object(os.path, 'exists')
+
     mock_exists.return_value = True
     mock_system.return_value = 1
     mock_rmdir.return_value = True

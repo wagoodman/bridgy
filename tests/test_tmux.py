@@ -11,8 +11,9 @@ import os
 
 from bridgy.tmux import TmuxSession
 
-@mock.patch.object(subprocess, 'Popen')
-def test_tmux_multiple_splits(mock_proc):
+def test_tmux_multiple_splits(mocker):
+    mock_proc = mocker.patch.object(subprocess, 'Popen')
+
     proc_obj = lambda: None
     proc_obj.returncode = 0
     proc_obj.communicate = lambda: ('', '')
@@ -38,8 +39,9 @@ def test_tmux_multiple_splits(mock_proc):
     for call in calls:
         mock_proc.assert_has_calls([call])
 
-@mock.patch.object(subprocess, 'Popen')
-def test_tmux_sync_multiple_splits(mock_proc):
+def test_tmux_sync_multiple_splits(mocker):
+    mock_proc = mocker.patch.object(subprocess, 'Popen')
+
     proc_obj = lambda: None
     proc_obj.returncode = 0
     proc_obj.communicate = lambda: ('', '')
@@ -66,8 +68,10 @@ def test_tmux_sync_multiple_splits(mock_proc):
     for call in calls:
         mock_proc.assert_has_calls([call])
 
-@mock.patch.object(subprocess, 'Popen')
-def test_tmux_multiple_windows(mock_proc):
+
+def test_tmux_multiple_windows(mocker):
+    mock_proc = mocker.patch.object(subprocess, 'Popen')
+
     proc_obj = lambda: None
     proc_obj.returncode = 0
     proc_obj.communicate = lambda: ('', '')
@@ -94,8 +98,9 @@ def test_tmux_multiple_windows(mock_proc):
         mock_proc.assert_has_calls([call])
 
 
-@mock.patch.object(subprocess, 'Popen')
-def test_tmux_layout(mock_proc):
+def test_tmux_layout(mocker):
+    mock_proc = mocker.patch.object(subprocess, 'Popen')
+
     proc_obj = lambda: None
     proc_obj.returncode = 0
     proc_obj.communicate = lambda: ('', '')
