@@ -11,7 +11,7 @@ class AwsInventory(InventorySource):
     name = 'aws'
 
     def __init__(self, cache_dir, access_key_id=None, secret_access_key=None, session_token=None, region=None):
-        if access_key_id == None and secret_access_key == None and session_token == None and region == None:
+        if access_key_id != None and secret_access_key != None and session_token != None and region != None:
             session = boto3.Session(
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
@@ -19,6 +19,7 @@ class AwsInventory(InventorySource):
                 region_name=region
             )
         else:
+            # pull from ~/.aws/* configs
             session = boto3.Session()
 
         self.pill = placebo.attach(session, data_path=cache_dir)
