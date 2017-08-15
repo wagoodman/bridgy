@@ -35,11 +35,14 @@ def inventory(config):
         proxies['https'] = os.environ['https_proxy']
 
     if source == 'aws':
-        return AwsInventory(access_key_id=srcCfg['access_key_id'],
+        if os.path.exists(os.path.expanduser("~/.aws")):
+            return AwsInventory(cache_dir=config.inventoryDir(AwsInventory.name))
+
+        return AwsInventory(cache_dir=config.inventoryDir(AwsInventory.name),
+                            access_key_id=srcCfg['access_key_id'],
                             secret_access_key=srcCfg['secret_access_key'],
                             session_token=srcCfg['session_token'],
-                            region=srcCfg['region'],
-                            cache_dir=config.inventoryDir(AwsInventory.name))
+                            region=srcCfg['region'])
     if source == 'csv':
         csvPath = os.path.join(config.inventoryDir(source), srcCfg['name'])
         # TODO: make delimiter optional if missing from config

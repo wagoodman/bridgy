@@ -1,6 +1,6 @@
 # bridgy
 
-![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)  **WIP/beta**
+![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)  (***WIP/beta***)
 
 **TL;DR**: bridgy = ssh + tmux + sshfs + cloud inventory search
 
@@ -85,6 +85,7 @@ brew install sshfs
 - [x] Run custom command on login (via config)
 - [ ] Push / pull files to and from instances (ansible? scp?)
 - [ ] Ssh tunnel to hosts
+- [ ] ECS support (exec to container, search tasks, etc)
 - [x] Python3 support :)
 
 **(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**

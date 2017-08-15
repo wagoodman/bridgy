@@ -39,6 +39,8 @@ csv:
 
 # All inventory parameters to support querying AWS
 aws:
+  # ~/.aws/* configs will be referenced by default, but can be overridden here
+
   # access_key_id: ACCESS_KEY
   # secret_access_key: SECRET_KEY
   # session_token: SESSION_TOKEN
@@ -167,7 +169,7 @@ class Config(object):
             logger.error("No inventory source specified (%s):" % self.__path)
             sys.exit(1)
 
-        if self.dig(source) == None:
+        if source not in self.__conf.keys():
             logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.__path))
             sys.exit(1)
 
