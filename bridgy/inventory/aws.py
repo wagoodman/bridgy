@@ -1,8 +1,10 @@
 import boto3
-# TODO: remove placebo and cache manually
 import placebo
+import logging
 
 from bridgy.inventory.source import InventorySource, Instance
+
+logger = logging.getLogger()
 
 class AwsInventory(InventorySource):
 
@@ -20,7 +22,10 @@ class AwsInventory(InventorySource):
         self.client = session.client('ec2')
 
     def update(self):
-        self.__ec2_search(stub=False)
+        try:
+            self.__ec2_search(stub=False)
+        except KeyboardInterrupt:
+            logger.error("Cancelled by user")
 
     def instances(self):
         data = self.__ec2_search(stub=True)
