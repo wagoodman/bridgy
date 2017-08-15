@@ -12,7 +12,9 @@ def test_aws_instances(mocker):
     test_dir = os.path.dirname(os.path.abspath(__file__))
     cache_dir = os.path.join(test_dir, 'aws_stubs')
 
-    aws_obj = AwsInventory(cache_dir, 'access_key_id', 'secret_access_key', 'session_token', 'region')
+    aws_obj = AwsInventory(cache_dir=cache_dir, access_key_id='access_key_id',
+                           secret_access_key='secret_access_key', session_token='session_token',
+                           region='region')
     instances = aws_obj.instances()
 
     expected_instances = [Instance(name=u'test-forms', address=u'devbox'),
