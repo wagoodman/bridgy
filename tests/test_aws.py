@@ -8,11 +8,11 @@ from bridgy.inventory.aws import AwsInventory
 from bridgy.config import Config
 
 
-def test_aws_instances():
+def test_aws_instances(mocker):
     test_dir = os.path.dirname(os.path.abspath(__file__))
     cache_dir = os.path.join(test_dir, 'aws_stubs')
 
-    aws_obj = AwsInventory('access_key_id', 'secret_access_key', 'session_token', 'region', cache_dir)
+    aws_obj = AwsInventory(cache_dir, 'access_key_id', 'secret_access_key', 'session_token', 'region')
     instances = aws_obj.instances()
 
     expected_instances = [Instance(name=u'test-forms', address=u'devbox'),
