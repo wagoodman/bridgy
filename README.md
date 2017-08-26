@@ -9,33 +9,26 @@ ssh into all matching instances via tmux.
 
 ![Image](demo.gif)
 
-Have a special multi-pane tmux layout for every system you login to? Drop it in
-the config (~/.bridgy/config.yml), reference it by name:
-```
-tmux:
-  layouts:
-    logger:
-      - cmd: split-window -h
-      - cmd: split-window -h
-      - cmd: split-window -v
-        run: tail -f /var/log/messages
-      - cmd: set-window-option synchronize-panes on
-```
-then...
-```
-$ python bridgy ssh -l logger awesomebox
-```
+**Features:**
+- [x] Fuzzy search against the inventory
+- [x] Custom inventory backends:
+  - [x] AWS
+  - [ ] GCP
+  - [x] New Relic
+  - [x] CSV
+- [x] Prompt for single/multi selection for matched hosts in inventory
+- [x] Open multiple ssh connections via tmux (splits or tabs)
+- [x] Configure custom tmux layouts (via config)
+- [x] Seamless connection via bastion (via config)
+- [x] Setup sshfs mount to a remote dir
+- [x] Run custom command on login (via config)
+- [x] Run arbitrary ansible playbooks
+- [x] Push / pull files (via ansible fetch/copy task)
+- [ ] Ssh tunnel to hosts
+- [ ] ECS support (exec to container, search tasks, etc)
+- [x] Python3 support :)
 
-Want to remotely mount a dir from your ec2 instance over ssh locally?
-
-```
-$ python bridgy mount awesomebox:/appdir
-[?] What instances would you like to have mounted? (enter to select):
- > o dev-myawesomeboxname                   (10.10.60.220)
-   o qa-myawesomeboxname                    (10.10.63.13)
-
-Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
-```
+**(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**
 
 ## Installing
 
@@ -68,27 +61,89 @@ brew install sshfs
 ¯\_(ツ)_/¯
 ```
 
-## Current features / Wish list
+## Current features
 
-- [x] Fuzzy search against the inventory
-- [x] Custom inventory backends:
-  - [x] AWS
-  - [ ] GCP
-  - [ ] Ansible inventory
-  - [x] New Relic
-  - [x] CSV
-- [x] Prompt for single/multi selection for matched hosts in inventory
-- [x] Open multiple ssh connections via tmux (splits or tabs)
-- [x] Configure custom tmux layouts (via config)
-- [x] Seamless connection via bastion (via config)
-- [x] Setup sshfs mount to a remote dir
-- [x] Run custom command on login (via config)
-- [ ] Push / pull files to and from instances (ansible? scp?)
-- [ ] Ssh tunnel to hosts
-- [ ] ECS support (exec to container, search tasks, etc)
-- [x] Python3 support :)
+Have a special multi-pane tmux layout for every system you login to? Drop it in
+the config (~/.bridgy/config.yml), reference it by name:
+```
+tmux:
+  layouts:
+    logger:
+      - cmd: split-window -h
+      - cmd: split-window -h
+      - cmd: split-window -v
+        run: tail -f /var/log/messages
+      - cmd: set-window-option synchronize-panes on
+```
+then...
+```
+$ bridgy ssh -l logger awesomebox
+```
 
-**(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**
+Want to remotely mount a dir from your ec2 instance over ssh locally?
+
+```
+$ bridgy mount awesomebox:/appdir
+[?] What instances would you like to have mounted? (enter to select):
+ > o dev-myawesomeboxname                   (10.10.60.220)
+   o qa-myawesomeboxname                    (10.10.63.13)
+
+Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
+```
+
+Want to perform arbitrary tasks? Drop in an ansible playbook in config (~/.bridgy/config.yml), reference it by name:
+```
+run:
+  grab-files:
+    - hosts: app-srv-13, dev-srv
+      gather_facts: no
+      tasks:
+        - name: 'Get secrets.yml'
+          fetch:
+            src: /appdir/config/secrets.yml
+            dest: /tmp/prefix-{{ inventory_hostname }}.secrets.yml
+            fail_on_missing: yes
+            flat: yes
+        - name: 'Get production.rb'
+          fetch:
+            src: /appdir/config/environments/production.rb
+            dest: /tmp/prefix-{{ inventory_hostname }}.production.rb
+            fail_on_missing: yes
+            flat: yes
+        - name: 'Get database.yml'
+          fetch:
+            src: /appdir/config/database.yml
+            dest: /tmp/prefix-{{ inventory_hostname }}.database.yml
+            fail_on_missing: yes
+            flat: yes
+```
+then...
+```
+$ bridgy run grab-files
+
+PLAY [app-srv-13, dev-srv] *****************************************************
+
+TASK [Get secrets.yml] ********************************************************
+ok: [dev-srv]
+ok: [app-srv-13]
+
+TASK [Get production.rb] ******************************************************
+ok: [dev-srv]
+ok: [app-srv-13]
+
+TASK [Get database.yml] *******************************************************
+ok: [dev-srv]
+ok: [app-srv-13]
+
+$ ls -1 /tmp | grep prefix
+prefix-dev-srv.database.yml
+prefix-dev-srv.production.rb
+prefix-dev-srv.secrets.yml
+prefix-app-srv-13.database.yml
+prefix-app-srv-13.production.rb
+prefix-app-srv-13.secrets.yml
+
+```
 
 ## Usage
 ```
@@ -98,6 +153,7 @@ brew install sshfs
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
   bridgy unmount [-dv] (-a | <host>...)
+  bridgy run <task>
   bridgy update [-v]
   bridgy (-h | --help)
   bridgy --version
@@ -107,6 +163,7 @@ Sub-commands:
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
+  run           execute the given ansible task defined as playbook yml in ~/.bridgy/config.yml
   update        pull the latest inventory from your cloud provider
 
 Options:

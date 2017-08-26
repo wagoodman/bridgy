@@ -11,6 +11,7 @@ Usage:
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
   bridgy unmount [-dv] (-a | <host>...)
+  bridgy run <task>
   bridgy update [-v]
   bridgy (-h | --help)
   bridgy --version
@@ -20,6 +21,7 @@ Sub-commands:
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
+  run           execute the given ansible task defined as playbook yml in ~/.bridgy/config.yml
   update        pull the latest inventory from your cloud provider
 
 Options:
@@ -46,7 +48,7 @@ from tabulate import tabulate
 from docopt import docopt
 
 from bridgy.version import __version__
-from bridgy.command import Ssh, Sshfs
+from bridgy.command import Ssh, Sshfs, RunAnsibleTask
 import bridgy.inventory as inventory
 import bridgy.config as cfg
 import bridgy.tmux as tmux
@@ -142,7 +144,6 @@ def ssh_handler(args, config):
         tmux.run(config, commands, args['-w'], layout, args['-d'], args['-s'])
 
 
-
 @utils.SupportedPlatforms('linux', 'osx')
 def mount_handler(args, config):
     Sshfs.ensure_sshfs_installed()
@@ -206,7 +207,9 @@ def unmount_handler(args, config):
         target_instances = prompt_targets(question, instances=mounted_targets, multiple=False, config=config)
 
     if len(target_instances) == 0:
-        logger.info("No matching mounts found")
+        logger.error("No matching mounts found")
+        if args['-a']:
+            logger.warn("Did you select targets with <space> and confirm with <enter>?")
         sys.exit(1)
 
     for sshfsObj in sshfs_objs:
@@ -219,7 +222,7 @@ def unmount_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def list_inventory_handler(args, config):
-    logger.info(tabulate( inventory.instances(config), headers=['Name', 'Address/Dns']))
+    logger.info(tabulate(inventory.instances(config), headers=['Name', 'Address/Dns']))
 
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
@@ -230,6 +233,22 @@ def update_handler(args, config):
     logger.warn("Updating inventory...")
     inventory_obj = inventory.inventory(config)
     inventory_obj.update()
+
+
+@utils.SupportedPlatforms('linux', 'windows', 'osx')
+def run_handler(args, config):
+    # TODO: implement -d -a and -v
+
+    task_name = args['<task>']
+    task_playbook = config.dig('run', task_name)
+
+    if not task_playbook:
+        logger.error("Playbook %s not configured." % repr(task_name))
+        sys.exit(1)
+
+    inventory_obj = inventory.inventory(config)
+    task = RunAnsibleTask(task_name, task_playbook[0], config, inventory_obj.instances())
+    task.run()
 
 
 def main():
@@ -271,6 +290,7 @@ def main():
         'list-inventory': list_inventory_handler,
         'unmount': unmount_handler,
         'update': update_handler,
+        'run': run_handler,
     }
 
     for opt, handler in list(opts.items()):

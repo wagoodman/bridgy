@@ -23,7 +23,8 @@ setuptools.setup(
                       'boto3',
                       'placebo',
                       'coloredlogs',
-                      'tabulate'],
+                      'tabulate',
+                      'ansible',],
     platforms='linux',
     keywords=['tmux', 'ssh', 'sshfs', 'aws', 'newrelic', 'inventory', 'cloud'],
     # latest from https://pypi.python.org/pypi?%3Aaction=list_classifiers

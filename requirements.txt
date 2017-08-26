@@ -7,3 +7,4 @@ boto3
 placebo
 coloredlogs
 tabulate
+ansible
