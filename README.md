@@ -34,7 +34,7 @@ ssh into all matching instances via tmux.
 
 **Linux**
 ```
-sudo pip install bridgy
+pip install --user bridgy
 
 # optionally support sshing into multiple systems at once
 sudo apt install tmux
@@ -46,7 +46,7 @@ sudo apt install sshfs
 **OSX**
 ```
 sudo easy_install pip
-sudo pip install bridgy --ignore-installed six
+pip install --user bridgy --ignore-installed six
 
 # optionally support sshing into multiple systems at once
 brew install tmux
