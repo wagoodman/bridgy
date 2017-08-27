@@ -222,7 +222,13 @@ def unmount_handler(args, config):
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def list_inventory_handler(args, config):
-    logger.info(tabulate(inventory.instances(config), headers=['Name', 'Address/Dns']))
+    instances = []
+    for ip, name, aliases in inventory.instances(config):
+        if aliases:
+            instances.append( (ip, name, ', '.join(aliases)) )
+        else:
+            instances.append( (ip, name, '--- None ---') )
+    logger.info(tabulate(instances, headers=['Name', 'Address/Dns', 'Aliases']))
 
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')

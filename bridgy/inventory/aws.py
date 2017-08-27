@@ -47,22 +47,29 @@ class AwsInventory(InventorySource):
                     address = instance['PrivateIpAddress']
 
                 # try to find the best field to match a name against
-                name = None
+                aliases = list()
                 if 'Tags' in list(instance.keys()):
                     for tagDict in instance['Tags']:
                         if tagDict['Key'] == 'Name':
-                            name = tagDict['Value']
+                            aliases.append(tagDict['Value'])
                             break
 
-                if name == None:
-                    if instance['PublicDnsName']:
-                        name = instance['PublicDnsName']
-                    elif instance['PrivateDnsName']:
-                        name = instance['PrivateDnsName']
+                if instance['PublicDnsName']:
+                    aliases.append(instance['PublicDnsName'])
+                if instance['PrivateDnsName']:
+                    aliases.append(instance['PrivateDnsName'])
+                if instance['InstanceId']:
+                    aliases.append(instance['InstanceId'])
+
+                aliases[:] = [x for x in aliases if x != None]
+                name = aliases.pop(0)
 
                 # take note of this instance
                 if name != None and address != None:
-                    instances.append(Instance(name, address))
+                    if len(aliases) > 0:
+                        instances.append(Instance(name, address, tuple(aliases)))
+                    else:
+                        instances.append(Instance(name, address))
 
         return instances
 

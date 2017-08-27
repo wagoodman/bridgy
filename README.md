@@ -12,7 +12,7 @@ ssh into all matching instances via tmux.
 **Features:**
 - [x] Fuzzy search against the inventory
 - [x] Custom inventory backends:
-  - [x] AWS
+  - [x] AWS (supports matching by tag, dns, or instance-id)
   - [ ] GCP
   - [x] New Relic
   - [x] CSV

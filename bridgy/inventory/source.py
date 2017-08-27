@@ -10,7 +10,9 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from fuzzywuzzy import fuzz
 
-Instance = collections.namedtuple("Instance", "name address")
+Instance = collections.namedtuple("Instance", "name address aliases")
+# allow there to be optional kwargs that default to None
+Instance.__new__.__defaults__ = (None,) * len(Instance._fields)
 
 class InventorySource(object):
     __metaclass__ = abc.ABCMeta
@@ -33,13 +35,17 @@ class InventorySource(object):
 
         for host in targets:
             for instance in allInstances:
-                if fuzzy:
-                    score = fuzz.partial_ratio(host.lower(), instance.name.lower())
-                    if score > 85 or host.lower() in instance.name.lower():
+                names = [instance.name]
+                if instance.aliases != None:
+                    names += [instance.aliases]
+                for name in names:
+                    if fuzzy:
+                        score = fuzz.partial_ratio(host.lower(), name.lower())
+                        if score > 85 or host.lower() in name.lower():
+                            matchedInstances.add(instance)
+                    elif partial and host.lower() in name.lower():
                         matchedInstances.add(instance)
-                elif partial and host.lower() in instance.name.lower():
-                    matchedInstances.add(instance)
-                elif host.lower() == instance.name.lower():
-                    matchedInstances.add(instance)
+                    elif host.lower() == name.lower():
+                        matchedInstances.add(instance)
 
         return matchedInstances
