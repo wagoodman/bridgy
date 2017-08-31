@@ -37,7 +37,7 @@ class InventorySource(object):
             for instance in allInstances:
                 names = [instance.name]
                 if instance.aliases != None:
-                    names += [instance.aliases]
+                    names += list(instance.aliases)
                 for name in names:
                     if fuzzy:
                         score = fuzz.partial_ratio(host.lower(), name.lower())

@@ -72,7 +72,7 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
 
     display_instances = collections.OrderedDict()
     for instance in sorted(instances):
-        display = "%-55s (%s)" % instance
+        display = "%-55s (%s)" % (instance.name, instance.address)
         display_instances[display] = instance
 
     questions = []
