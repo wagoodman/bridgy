@@ -169,6 +169,10 @@ class Config(object):
             logger.error("No inventory source specified (%s):" % self.__path)
             sys.exit(1)
 
+        if source == 'newrelic' and self.dig('newrelic', 'insights_query_api_key') == "API_KEY":
+            logger.error("New Relic inventory selected but no API key was specified: %s" % self.__path)
+            sys.exit(1)
+
         if source not in self.__conf.keys():
             logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.__path))
             sys.exit(1)
