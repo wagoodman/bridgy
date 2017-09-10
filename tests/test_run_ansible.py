@@ -31,7 +31,7 @@ def test_hostfile_gocase(mocker):
     contents = task._build_host_file_contents()
 
     assert contents.strip() == """\
-devenv-pubsrv ansible_host=13.14.15.16 ssh_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "
-testenv-pubsrv ansible_host=1.2.3.4 ssh_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "
-testenv-formsvc ansible_host=17.18.19.20 ssh_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "\
+devenv-pubsrv ansible_host=13.14.15.16 ansible_ssh_common_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "
+testenv-pubsrv ansible_host=1.2.3.4 ansible_ssh_common_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "
+testenv-formsvc ansible_host=17.18.19.20 ansible_ssh_common_args="-o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' "\
 """.strip()

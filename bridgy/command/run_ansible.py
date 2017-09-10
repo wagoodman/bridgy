@@ -40,7 +40,7 @@ class RunAnsibleTask(object):
         variable_manager = VariableManager()
         loader = DataLoader()
 
-        options = Options(connection='paramiko', module_path='', forks=100, become=True,
+        options = Options(connection='ssh', module_path='', forks=100, become=True,
                           become_method=self.become_method, become_user=self.become_user, check=False, verbosity=5)
 
         passwords = dict(vault_pass='secret')
@@ -72,7 +72,7 @@ class RunAnsibleTask(object):
 
             options = ssh_obj.options
             if len(options) > 0:
-                instance_str += " ssh_args=\"{}\"".format(options)
+                instance_str += " ansible_ssh_common_args=\"{}\"".format(options)
 
             user = self.config.dig('ssh', 'user')
             if user:
