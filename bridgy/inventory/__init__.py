@@ -1,5 +1,6 @@
 import os
 
+from bridgy.utils import memoize
 from bridgy.inventory.source import Instance
 from bridgy.inventory.aws import AwsInventory
 from bridgy.inventory.flatfile import CsvInventory
@@ -13,7 +14,7 @@ SOURCES = {
     'newrelic': NewRelicInventory,
 }
 
-
+@memoize
 def inventory(config):
     source = config.dig('inventory', 'source')
     srcCfg = config[source]
@@ -56,6 +57,7 @@ def inventory(config):
                                  data_path=config.inventoryDir(NewRelicInventory.name),
                                  proxies=proxies)
 
+@memoize
 def instances(config):
     return inventory(config).instances()
 

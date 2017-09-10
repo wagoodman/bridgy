@@ -248,12 +248,27 @@ def run_handler(args, config):
     task_name = args['<task>']
     task_playbook = config.dig('run', task_name)
 
+    not_found = []
+    desired_instances = []
+    desired_targets = [ x.strip() for x in config.dig('run', task_name)[0]['hosts'].split(',') ]
+    for desired_target in desired_targets:
+        instances = inventory.search(config, [desired_target])
+        if len(instances) == 0:
+            not_found.append(desired_target)
+            continue
+
+        instance = inventory.Instance(desired_target, instances[0].address)
+        desired_instances.append(instance)
+
+    if len(not_found) > 0:
+        logger.error("Unable to find instancesL %s" % ", ".join(not_found))
+        sys.exit(1)
+
     if not task_playbook:
         logger.error("Playbook %s not configured." % repr(task_name))
         sys.exit(1)
 
-    inventory_obj = inventory.inventory(config)
-    task = RunAnsibleTask(task_name, task_playbook[0], config, inventory_obj.instances())
+    task = RunAnsibleTask(task_name, task_playbook[0], config, desired_instances)
     task.run()
 
 

@@ -42,10 +42,10 @@ class InventorySource(object):
                     if fuzzy:
                         score = fuzz.partial_ratio(host.lower(), name.lower())
                         if score > 85 or host.lower() in name.lower():
-                            matchedInstances.add(instance)
+                            matchedInstances.add((score, instance))
                     elif partial and host.lower() in name.lower():
-                        matchedInstances.add(instance)
+                        matchedInstances.add((99, instance))
                     elif host.lower() == name.lower():
-                        matchedInstances.add(instance)
+                        matchedInstances.add((100, instance))
 
-        return matchedInstances
+        return [ v for k,v in sorted(list(matchedInstances)) ]
