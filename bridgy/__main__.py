@@ -48,7 +48,7 @@ from tabulate import tabulate
 from docopt import docopt
 
 from bridgy.version import __version__
-from bridgy.command import Ssh, Sshfs, RunAnsibleTask
+from bridgy.command import Ssh, Sshfs, RunAnsiblePlaybook
 import bridgy.inventory as inventory
 import bridgy.config as cfg
 import bridgy.tmux as tmux
@@ -268,7 +268,7 @@ def run_handler(args, config):
         logger.error("Playbook %s not configured." % repr(task_name))
         sys.exit(1)
 
-    task = RunAnsibleTask(task_name, task_playbook[0], config, desired_instances)
+    task = RunAnsiblePlaybook(task_name, task_playbook[0], config, desired_instances)
     task.run()
 
 
