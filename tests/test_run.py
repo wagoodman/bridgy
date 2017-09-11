@@ -6,7 +6,7 @@ except ImportError:
 import pytest
 
 from bridgy.inventory import Instance
-from bridgy.command import RunAnsibleTask
+from bridgy.command import RunAnsiblePlaybook
 from bridgy.config import Config
 
 
@@ -27,7 +27,7 @@ def test_hostfile_gocase(mocker):
                  Instance(name='testenv-pubsrv', address='1.2.3.4'),
                  Instance(name='testenv-formsvc', address='17.18.19.20')]
 
-    task = RunAnsibleTask('name', 'playbook', config, instances)
+    task = RunAnsiblePlaybook('name', 'playbook', config, instances)
     contents = task._build_host_file_contents()
 
     assert contents.strip() == """\
