@@ -6,7 +6,7 @@ by tmux.
 
 Usage:
   bridgy ssh [-adsuvw] [-l LAYOUT] <host>...
-  bridgy ssh [-dsuv] --no-tmux <host>
+  bridgy ssh [-dsuv] --tmux <host>
   bridgy list-inventory
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
@@ -28,8 +28,8 @@ Options:
   -a        --all            Automatically use all matched hosts.
   -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
-  -n        --no-tmux        Ssh into a single server without tmux.
   -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
+  -t        --tmux           Open all ssh connections in a tmux session.
   -u        --update         pull the latest instance inventory from aws then run the specified command.
   -w        --windows        Use tmux windows instead of panes for each matched host.
   -h        --help           Show this screen.
@@ -114,12 +114,12 @@ def ssh_handler(args, config):
     if config.dig('inventory', 'update_at_start') or args['-u']:
         update_handler(args, config)
 
-    if args ['--no-tmux'] or config.dig('ssh', 'no-tmux'):
-        question = "What instance would you like to ssh into?"
-        targets = prompt_targets(question, targets=args['<host>'], config=config, multiple=False)
-    else:
+    if args ['--tmux'] or config.dig('ssh', 'tmux'):
         question = "What instances would you like to ssh into?"
         targets = prompt_targets(question, targets=args['<host>'], config=config)
+    else:
+        question = "What instance would you like to ssh into?"
+        targets = prompt_targets(question, targets=args['<host>'], config=config, multiple=False)
 
     if len(targets) == 0:
         logger.info("No matching instances found")
@@ -134,14 +134,14 @@ def ssh_handler(args, config):
     if args['--layout']:
         layout = args['--layout']
 
-    if args['--no-tmux'] or config.dig('ssh', 'no-tmux'):
+    if args['--tmux'] or config.dig('ssh', 'tmux'):
+        tmux.run(config, commands, args['-w'], layout, args['-d'], args['-s'])
+    else:
         cmd = list(commands.values())[0]
         if args['-d']:
             logger.debug(cmd)
         else:
             os.system(cmd)
-    else:
-        tmux.run(config, commands, args['-w'], layout, args['-d'], args['-s'])
 
 
 @utils.SupportedPlatforms('linux', 'osx')
@@ -288,9 +288,9 @@ def main():
     args = docopt(__doc__, version=version)
 
     if not tmux.is_installed():
-        if not args ['--no-tmux'] and not config.dig('ssh', 'no-tmux'):
+        if args ['--tmux'] or config.dig('ssh', 'tmux'):
             logger.warn("Tmux not installed. Cannot support split screen.")
-        args['--no-tmux'] = True
+        args['--tmux'] = False
 
     if args['-v']:
         coloredlogs.install(fmt='%(message)s', level='DEBUG')

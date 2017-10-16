@@ -63,8 +63,8 @@ ssh:
   # Run a command upon logging into any host (optional)
   # command: sudo -i su - another_user -s /bin/bash
 
-  # Tmux is automatically used to wrap all ssh sessions, specify otherwise here (optional)
-  # no-tmux: true
+  # Use Tmux to wrap all ssh sessions (optional)
+  # tmux: true
 
 # If you need to connect to aws hosts via a bastion, then provide all connectivity information here
 bastion:
