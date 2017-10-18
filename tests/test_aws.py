@@ -5,7 +5,6 @@ import shlex
 
 from bridgy.inventory import Instance
 from bridgy.inventory.aws import AwsInventory
-from bridgy.config import Config
 
 
 def test_aws_instances(mocker):
