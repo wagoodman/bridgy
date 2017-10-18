@@ -26,6 +26,11 @@ inventory:
   # http_proxy: someurl
   # https_proxy: someurl
 
+  # You can configure inclusion or exclusion inventory filters that match on the given python regex
+  # Note: you can only use one of the options at a time, not both
+  # exclude_pattern: .*PROD.*
+  # include_pattern: [0-9]{4}-TEST.*
+
 # All inventory parameters for a CSV source
 csv:
   # Name of the inventory CSV placed in ~/.bridgy/inventory/csv
@@ -175,6 +180,10 @@ class Config(object):
 
         if source not in self.__conf.keys():
             logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.__path))
+            sys.exit(1)
+
+        if self.dig('inventory', 'include_pattern') != None and self.dig('inventory', 'exclude_pattern') != None:
+            logger.error("'exclude_pattern' and 'include_pattern' are mutually exclusive")
             sys.exit(1)
 
     def __iter__(self):

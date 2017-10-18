@@ -18,7 +18,7 @@ class InventorySource(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, config): pass
+    def __init__(self): pass
 
     @abc.abstractproperty
     def name(self): pass
@@ -48,4 +48,4 @@ class InventorySource(object):
                     elif host.lower() == name.lower():
                         matchedInstances.add((100, instance))
 
-        return [ v for k,v in sorted(list(matchedInstances)) ]
+        return [v for k,v in sorted(list(matchedInstances))]
