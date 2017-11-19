@@ -1,0 +1,98 @@
+# Bridgy uses an inventory of hostnames and addresses as a source to search against and ssh into.
+inventory:
+#   # Supported values are: csv, newrelic, aws
+#   source: csv
+
+  # Attempts to pull the latest inventory when running any bridgy command (optional)
+  update_at_start: true
+
+  # When matching instance names to a given input, use fuzzy search instead of partial match
+  fuzzy_search: true
+
+  # If you need to fetch your inventory from behind a proxy bridgy will first check for http_proxy and https_proxy
+  # keys from the config, then check the environment for the same keys. (optional)
+  # http_proxy: someurl
+  # https_proxy: someurl
+
+  # You can configure inclusion or exclusion inventory filters that match on the given python regex
+  # Note: you can only use one of the options at a time, not both
+  # exclude_pattern: .*PROD.*
+  # include_pattern: [0-9]{4}-TEST.*
+
+# All inventory parameters for a CSV source
+csv:
+  # Name of the inventory CSV placed in ~/.bridgy/inventory/csv
+  # name: example.csv
+
+  # These are the csv column names, specify at least 'name' and 'address'
+  # fields: name, address, random
+
+  # Optional. Defaults to ','
+  # delimiter: '|'
+
+# All inventory parameters to support querying AWS
+aws:
+  # ~/.aws/* configs will be referenced by default, but can be overridden here
+
+  # access_key_id: ACCESS_KEY
+  # secret_access_key: SECRET_KEY
+  # session_token: SESSION_TOKEN
+  # region: us-west-2
+
+# All inventory parameters to support querying AWS
+newrelic:
+  # account_number: ACCOUNT_NUMBER
+  # insights_query_api_key: API_KEY
+
+# All SSH connectivity configuration
+ssh:
+  # User to use when SSHing into a host (optional)
+  # user: johnybgoode
+
+  # Any valid cli options you would specify to SSH (optional)
+  # Note: these options are not applied to sshfs
+  options: -C -o ForwardAgent=yes -o FingerprintHash=sha256 -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
+
+  # Run a command upon logging into any host (optional)
+  # command: sudo -i su - another_user -s /bin/bash
+
+  # Use Tmux to wrap all ssh sessions (optional)
+  # tmux: true
+
+# If you need to connect to aws hosts via a bastion, then provide all connectivity information here
+bastion:
+  # User to use when SSHing into the bastion host (optional)
+  # user: johnybgoode
+
+  # Address of the bastion host
+  # address: zest
+
+  # Any valid cli options you would specify to SSH (optional)
+  options: -C -o ServerAliveInterval=255 -o FingerprintHash=sha256 -o ForwardAgent=yes -o TCPKeepAlive=yes
+
+# This specifies any SSHFS options for mounting remote directories
+sshfs:
+   # Any sshfs option that you would specify to sshfs (optional)
+   # Tip: if you need to be another user on the remote system you can do so via sudo:
+   # options: -o sftp_server="/usr/bin/sudo /usr/lib/openssh/sftp-server"
+   options: -o auto_cache,reconnect,no_readahead -C -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
+
+tmux:
+
+  # You can make multiple panes to a single host by specifying a layout definition. Simply
+  # define each tmux command to run and an optional command to run in that pane.
+  # Use these layouts by name with the -l cli option (bridgy ssh -l somename host...)
+  layout:
+  # an example layout... :
+
+  #  somename:
+  #  - cmd: split-window -h
+  #    run: echo "first split" && bash
+  #  - cmd: split-window -h
+  #    run: echo "second split" && bash
+  #  - cmd: split-window -v
+  #     run: echo "third split" && bash
+
+  # another example layout... :
+  #  someothername:
+  #  - cmd: split-window -h
