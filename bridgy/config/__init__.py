@@ -39,7 +39,7 @@ def _detectConfigSchema(config):
     return '1'
 
 def Config(initialData=None):
-    if initialData:
+    if initialData != None:
         configContents = initialData
         schema = _detectConfigSchema(configContents)
     else:
