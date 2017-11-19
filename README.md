@@ -10,12 +10,14 @@ ssh into all matching instances via tmux.
 ![Image](demo.gif)
 
 **Features:**
-- [x] Fuzzy search against the inventory
-- [x] Custom inventory backends:
+- [x] Custom inventory sources:
   - [x] AWS (supports matching by tag, dns, or instance-id)
   - [ ] GCP
   - [x] New Relic
   - [x] CSV
+  - [ ] Ansible inventory
+- [x] Search against multiple inventory sources simultaneously
+- [x] Fuzzy search against the inventory
 - [x] Prompt for single/multi selection for matched hosts in inventory
 - [x] Open multiple ssh connections via tmux (splits or tabs)
 - [x] Configure custom tmux layouts (via config)

@@ -67,9 +67,9 @@ class AwsInventory(InventorySource):
                 # take note of this instance
                 if name != None and address != None:
                     if len(aliases) > 0:
-                        instances.append(Instance(name, address, tuple(aliases)))
+                        instances.append(Instance(name, address, tuple(aliases), self.name))
                     else:
-                        instances.append(Instance(name, address))
+                        instances.append(Instance(name, address, self.name))
 
         return instances
 

@@ -78,17 +78,17 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
     questions = []
 
     if multiple:
-        q = inquirer.Checkbox('instance',
-                              message="%s%s%s (space to multi-select, enter to finish)" % (utils.color.BOLD, question, utils.color.NORMAL),
-                              choices=list(display_instances.keys()) + ['all'],
-                              # default='all'
-                              )
+        question = inquirer.Checkbox('instance',
+                                     message="%s%s%s (space to multi-select, enter to finish)" % (utils.color.BOLD, question, utils.color.NORMAL),
+                                     choices=list(display_instances.keys()) + ['all'],
+                                     # default='all'
+                                     )
     else:
-        q = inquirer.List('instance',
-                           message="%s%s%s (enter to select)" % (utils.color.BOLD, question, utils.color.NORMAL),
-                           choices=list(display_instances.keys()),
-                           )
-    questions.append(q)
+        question = inquirer.List('instance',
+                                 message="%s%s%s (enter to select)" % (utils.color.BOLD, question, utils.color.NORMAL),
+                                 choices=list(display_instances.keys()),
+                                 )
+    questions.append(question)
 
     answers = None
     try:
@@ -223,12 +223,12 @@ def unmount_handler(args, config):
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def list_inventory_handler(args, config):
     instances = []
-    for ip, name, aliases in inventory.instances(config):
+    for ip, name, aliases, source in inventory.instances(config):
         if aliases:
-            instances.append( (ip, name, ', '.join(aliases)) )
+            instances.append( (ip, name, ', '.join(aliases), source) )
         else:
-            instances.append( (ip, name, '--- None ---') )
-    logger.info(tabulate(instances, headers=['Name', 'Address/Dns', 'Aliases']))
+            instances.append( (ip, name, '--- None ---', source) )
+    logger.info(tabulate(instances, headers=['Name', 'Address/Dns', 'Aliases', 'Source']))
 
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')

@@ -13,8 +13,11 @@ setuptools.setup(
     author_email=__email__,
     description='Easily search your cloud inventory and integrate with ssh + tmux + sshfs',
     packages=setuptools.find_packages(),
-    zip_safe=False,
+    package_data={
+        'bridgy': ['config/samples/*.yml']
+    },
     include_package_data=True,
+    zip_safe=False,
     install_requires=['PyYAML',
                       'requests',
                       'docopt',
