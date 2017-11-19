@@ -22,10 +22,20 @@ def inventory(config):
 
     for source, srcCfg in config.sources():
         if source == 'aws':
-            if os.path.exists(os.path.expanduser("~/.aws")):
-                inventory = AwsInventory(cache_dir=config.inventoryDir(AwsInventory.name))
+            cache_dir = config.inventoryDir(AwsInventory.name)
+            if srcCfg['name'] != None:
+                cache_dir = os.path.join(cache_dir, srcCfg['name'])
+                if not os.path.exists(cache_dir):
+                    os.mkdir(cache_dir)
+
+            if srcCfg['profile'] != None:
+                inventory = AwsInventory(cache_dir,
+                                         region=srcCfg['region'],
+                                         profile=srcCfg['profile'])
+            elif os.path.exists(os.path.expanduser("~/.aws")):
+                inventory = AwsInventory(cache_dir)
             else:
-                inventory = AwsInventory(cache_dir=config.inventoryDir(AwsInventory.name),
+                inventory = AwsInventory(cache_dir,
                                          access_key_id=srcCfg['access_key_id'],
                                          secret_access_key=srcCfg['secret_access_key'],
                                          session_token=srcCfg['session_token'],
