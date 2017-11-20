@@ -17,7 +17,7 @@ class Config(ConfigBase):
 
     def sources(self):
         source = self.dig('inventory', 'source')
-        return list( (source, self[source],) )
+        return [ (source, self[source],) ]
 
     @property
     def config_template_path(self):
