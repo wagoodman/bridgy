@@ -22,11 +22,9 @@ def inventory(config):
 
     for source, srcCfg in config.sources():
         if source == 'aws':
-            cache_dir = config.inventoryDir(AwsInventory.name)
-            if srcCfg['name'] != None:
-                cache_dir = os.path.join(cache_dir, srcCfg['name'])
-                if not os.path.exists(cache_dir):
-                    os.mkdir(cache_dir)
+            cache_dir = config.inventoryDir(AwsInventory.name, srcCfg['name'])
+            if not os.path.exists(cache_dir):
+                os.mkdir(cache_dir)
 
             if srcCfg['profile'] != None:
                 inventory = AwsInventory(cache_dir,
@@ -43,7 +41,7 @@ def inventory(config):
             inventorySet.add(inventory)
 
         elif source == 'csv':
-            csvPath = os.path.join(config.inventoryDir(source), srcCfg['name'])
+            csvPath = config.inventoryDir(source, srcCfg['name'])
             inventory = CsvInventory(path=csvPath,
                                      fields=srcCfg['fields'],
                                      delimiter=srcCfg['delimiter'] or ',' )
