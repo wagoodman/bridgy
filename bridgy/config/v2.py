@@ -43,3 +43,18 @@ class Config(ConfigBase):
                 if 'insights_query_api_key' in srcCfg and srcCfg['insights_query_api_key'] == "API_KEY":
                     logger.error("New Relic inventory selected but no API key was specified: %s" % self.path)
                     sys.exit(1)
+            if source == 'aws':
+                if 'name' not in srcCfg:
+                    logger.error("AWS inventory sources must specify name.")
+                    sys.exit(1)
+                if 'region' not in srcCfg:
+                    logger.error("AWS inventory sources must specify region.")
+                    sys.exit(1)
+                if 'profile' in srcCfg:
+                    if 'access_key_id' in srcCfg or 'secret_access_key' in srcCfg or 'session_token' in srcCfg:
+                        logger.error("AWS profile conflicts with access_key_id, secret_access_key, or session_token.")
+                        sys.exit(1)
+                if 'access_key_id' in srcCfg or 'secret_access_key' in srcCfg or 'session_token' in srcCfg:
+                    if 'profile' in srcCfg:
+                        logger.error("AWS access_key_id, secret_access_key, and session_token conflict with profile.")
+                        sys.exit(1)
