@@ -26,6 +26,9 @@ class ConfigBase(object):
         self.conf = initial_data
 
     @abc.abstractproperty
+    def version(self): pass
+
+    @abc.abstractproperty
     def config_template_path(self): pass
 
     @abc.abstractproperty
@@ -81,11 +84,8 @@ class ConfigBase(object):
 
     def inventoryDir(self, source, name=''):
         if source not in list(inventory.SOURCES.keys()):
-            raise RuntimeError(
-                "Unexpected inventory source: %s" % repr(source))
-        return os.path.join(os.path.expanduser(self.inventory),
-                            source,
-                            name)
+            raise RuntimeError("Unexpected inventory source: %s" % repr(source))
+        return os.path.join(os.path.expanduser(self.inventory), source, name)
 
     @property
     def mount_root_dir(self):

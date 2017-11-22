@@ -11,7 +11,9 @@ class CsvInventory(InventorySource):
 
     name = 'csv'
 
-    def __init__(self, path, fields, delimiter=','):
+    def __init__(self, path, fields, delimiter=',', **kwargs):
+        super(CsvInventory, self).__init__(path, fields, delimiter, **kwargs)
+
         self.csv_path = path
         self.fields = [f.strip() for f in fields.split(",")]
         self.delimiter = delimiter.strip()

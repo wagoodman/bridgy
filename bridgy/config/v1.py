@@ -20,6 +20,10 @@ class Config(ConfigBase):
         return [ (source, self[source],) ]
 
     @property
+    def version(self):
+        return 1
+
+    @property
     def config_template_path(self):
         return CONFIG_TEMPLATE_NAME
 

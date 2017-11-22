@@ -13,7 +13,9 @@ class NewRelicInventory(InventorySource):
     name = 'newrelic'
     url = "https://insights-api.newrelic.com/v1/accounts/{}/query?nrql={}"
 
-    def __init__(self, account_number, insights_query_api_key, data_path, proxies=None):
+    def __init__(self, account_number, insights_query_api_key, data_path, proxies=None, **kwargs):
+        super(NewRelicInventory, self).__init__(account_number, insights_query_api_key, data_path, proxies, **kwargs)
+
         self.account_number = account_number
         self.insights_query_api_key = insights_query_api_key
         self.data_file = os.path.join(data_path, '%s.json' % str(account_number))

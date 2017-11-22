@@ -24,12 +24,11 @@ inventory:
 
     # All inventory parameters for a CSV source
     # - type: csv
+    #   name: user-defined name (optional)
     #   # Name of the inventory CSV placed in ~/.bridgy/inventory/csv
-    #   name: example.csv
-
+    #   file: example.csv
     #   # These are the csv column names, specify at least 'name' and 'address'
     #   fields: name, address, random
-
     #   # Optional. Defaults to ','
     #   delimiter: '|'
 
@@ -51,6 +50,7 @@ inventory:
 
     # All inventory parameters to support querying New Relic
     # - type: newrelic
+    #   name: user-defined name (optional)
     #   account_number: ACCOUNT_NUMBER
     #   insights_query_api_key: API_KEY
 

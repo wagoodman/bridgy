@@ -1,3 +1,4 @@
+import os
 import boto3
 import placebo
 import logging
@@ -10,21 +11,29 @@ class AwsInventory(InventorySource):
 
     name = 'aws'
 
-    def __init__(self, cache_dir, access_key_id=None, secret_access_key=None, session_token=None, region=None, profile=None):
-        if profile != None:
+    # kwargs: access_key_id, secret_access_key, session_token, region, profile, config_path
+    def __init__(self, cache_dir, **kwargs):
+        super(AwsInventory, self).__init__(cache_dir, **kwargs)
+
+        # this is an override for the config location (at least useful for testing)
+        if 'config_path' in kwargs:
+            os.environ['AWS_CONFIG_FILE'] = os.path.join(kwargs['config_path'], "config")
+            os.environ['AWS_SHARED_CREDENTIALS_FILE'] = os.path.join(kwargs['config_path'], "credentials")
+
+        if 'profile' in kwargs and kwargs['profile'] != None:
             session = boto3.Session(
-                profile_name=profile,
-                region_name=region
+                profile_name=kwargs['profile'],
+                region_name=kwargs['region']
             )
-        elif access_key_id != None and secret_access_key != None and session_token != None and region != None:
+        elif 'access_key_id' in kwargs and 'secret_access_key' in kwargs and 'session_token' in kwargs and 'region' in kwargs:
             session = boto3.Session(
-                aws_access_key_id=access_key_id,
-                aws_secret_access_key=secret_access_key,
-                aws_session_token=session_token,
-                region_name=region
+                aws_access_key_id=kwargs['access_key_id'],
+                aws_secret_access_key=kwargs['secret_access_key'],
+                aws_session_token=kwargs['session_token'],
+                region_name=kwargs['region']
             )
         else:
-            # pull from ~/.aws/* configs
+            # pull from ~/.aws/* configs (or other boto search paths)
             session = boto3.Session()
 
         self.pill = placebo.attach(session, data_path=cache_dir)

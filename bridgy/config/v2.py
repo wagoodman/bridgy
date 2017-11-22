@@ -24,6 +24,10 @@ class Config(ConfigBase):
         return ret
 
     @property
+    def version(self):
+        return 2
+
+    @property
     def config_template_path(self):
         return CONFIG_TEMPLATE_NAME
 
@@ -46,9 +50,6 @@ class Config(ConfigBase):
             if source == 'aws':
                 if 'name' not in srcCfg:
                     logger.error("AWS inventory sources must specify name.")
-                    sys.exit(1)
-                if 'region' not in srcCfg:
-                    logger.error("AWS inventory sources must specify region.")
                     sys.exit(1)
                 if 'profile' in srcCfg:
                     if 'access_key_id' in srcCfg or 'secret_access_key' in srcCfg or 'session_token' in srcCfg:

@@ -1,0 +1,8 @@
+[default]
+region = us-west-2
+
+[somewhere]
+region = us-east-1
+
+[else]
+region = us-east-2

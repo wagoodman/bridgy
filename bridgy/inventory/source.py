@@ -17,11 +17,11 @@ Instance.__new__.__defaults__ = (None,) * len(Instance._fields)
 class InventorySource(object):
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
-    def __init__(self): pass
+    name = "Invalid"
 
-    @abc.abstractproperty
-    def name(self): pass
+    def __init__(self, *args, **kwargs):
+        if 'name' in kwargs:
+            self.name = "%s (%s)" % (kwargs['name'], self.name)
 
     @abc.abstractmethod
     def update(self): pass
@@ -56,7 +56,8 @@ class InventorySource(object):
 
 class InventorySet(InventorySource):
 
-    def __init__(self, inventories=None):
+    def __init__(self, inventories=None, **kwargs):
+        super(InventorySet, self).__init__(inventories, **kwargs)
         self.inventories = []
 
         if inventories != None:

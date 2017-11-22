@@ -30,9 +30,9 @@ def test_aws_instances(mocker):
 def test_aws_instances_profile(mocker):
     test_dir = os.path.dirname(os.path.abspath(__file__))
     cache_dir = os.path.join(test_dir, 'aws_stubs')
+    config_dir = os.path.join(test_dir, 'aws_configs')
 
-    aws_obj = AwsInventory(cache_dir=cache_dir, profile='default',
-                           region='region')
+    aws_obj = AwsInventory(cache_dir=cache_dir, profile='somewhere', region='region', config_path=config_dir)
     instances = aws_obj.instances()
 
     expected_instances = [Instance(name='test-forms', address='devbox', aliases=('devbox', 'ip-172-31-8-185.us-west-2.compute.internal', 'i-e54cbaeb'), source='aws'),
@@ -45,3 +45,7 @@ def test_aws_instances_profile(mocker):
                           Instance(name='test-pubsrv', address='devbox', aliases=('devbox', 'ip-172-31-2-39.us-west-2.compute.internal', 'i-0f500447384e95943'), source='aws')]
 
     assert set(instances) == set(expected_instances)
+
+    from botocore.exceptions import ProfileNotFound
+    with pytest.raises(ProfileNotFound):
+        aws_obj = AwsInventory(cache_dir=cache_dir, profile='some-unconfigured-profile', region='region', config_path=config_dir)

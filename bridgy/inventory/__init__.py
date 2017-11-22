@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+import logging
 from functools import partial
 
 from bridgy.utils import memoize
@@ -9,6 +11,8 @@ from bridgy.inventory.flatfile import CsvInventory
 from bridgy.inventory.newrelic import NewRelicInventory
 # from gcp import GcpInventory
 
+logger = logging.getLogger()
+
 SOURCES = {
     'aws': AwsInventory,
     # 'gcp': GcpInventory,
@@ -16,36 +20,34 @@ SOURCES = {
     'newrelic': NewRelicInventory,
 }
 
+
 @memoize
 def inventory(config):
     inventorySet = InventorySet()
 
     for source, srcCfg in config.sources():
         if source == 'aws':
-            cache_dir = config.inventoryDir(AwsInventory.name, srcCfg['name'])
+            # the cache directory for the original v1 config did not separate 
+            # out multiple aws profiles into subdirectories
+            if config.version == 1:
+                cache_dir = config.inventoryDir(AwsInventory.name)
+            else:
+                cache_dir = config.inventoryDir(AwsInventory.name, srcCfg['name'])
+            
             if not os.path.exists(cache_dir):
                 os.mkdir(cache_dir)
 
-            if srcCfg['profile'] != None:
-                inventory = AwsInventory(cache_dir,
-                                         region=srcCfg['region'],
-                                         profile=srcCfg['profile'])
-            elif os.path.exists(os.path.expanduser("~/.aws")):
-                inventory = AwsInventory(cache_dir)
-            else:
-                inventory = AwsInventory(cache_dir,
-                                         access_key_id=srcCfg['access_key_id'],
-                                         secret_access_key=srcCfg['secret_access_key'],
-                                         session_token=srcCfg['session_token'],
-                                         region=srcCfg['region'])
-            inventorySet.add(inventory)
+            from botocore.exceptions import ProfileNotFound
+            try:
+                inv = AwsInventory(cache_dir, **srcCfg)
+                inventorySet.add(inv)
+            except ProfileNotFound:
+                logger.error("Unconfigured AWS profile configured.")
+                sys.exit(1)
 
         elif source == 'csv':
-            csvPath = config.inventoryDir(source, srcCfg['name'])
-            inventory = CsvInventory(path=csvPath,
-                                     fields=srcCfg['fields'],
-                                     delimiter=srcCfg['delimiter'] or ',' )
-            inventorySet.add(inventory)
+            inv = CsvInventory(path=config.inventoryDir(source, srcCfg['file']), **srcCfg)
+            inventorySet.add(inv)
 
         elif source == 'newrelic':
 
@@ -65,11 +67,11 @@ def inventory(config):
             elif 'https_proxy' in os.environ:
                 proxies['https'] = os.environ['https_proxy']
 
-            inventory = NewRelicInventory(account_number=srcCfg['account_number'],
-                                          insights_query_api_key=srcCfg['insights_query_api_key'],
-                                          data_path=config.inventoryDir(NewRelicInventory.name),
-                                          proxies=proxies)
-            inventorySet.add(inventory)
+            inv = NewRelicInventory(data_path=config.inventoryDir(NewRelicInventory.name),
+                                    proxies=proxies,
+                                    **srcCfg)
+ 
+            inventorySet.add(inv)
         
     return inventorySet
 
