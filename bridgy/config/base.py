@@ -79,12 +79,13 @@ class ConfigBase(object):
         if not os.path.exists(mount_path):
             os.mkdir(mount_path)
 
-    def inventoryDir(self, source):
+    def inventoryDir(self, source, name=''):
         if source not in list(inventory.SOURCES.keys()):
             raise RuntimeError(
                 "Unexpected inventory source: %s" % repr(source))
         return os.path.join(os.path.expanduser(self.inventory),
-                            source)
+                            source,
+                            name)
 
     @property
     def mount_root_dir(self):

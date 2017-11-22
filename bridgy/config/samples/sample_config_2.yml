@@ -33,13 +33,20 @@ inventory:
     #   # Optional. Defaults to ','
     #   delimiter: '|'
 
-    # All inventory parameters to support querying AWS
+    # Inventory parameters to support querying AWS using access/secret key
     # - type: aws
     #   # ~/.aws/* configs will be referenced by default, but can be overridden here.
     #   # The following are optional fields:
+    #   name: user-defined name (must be unique)
     #   access_key_id: ACCESS_KEY
     #   secret_access_key: SECRET_KEY
     #   session_token: SESSION_TOKEN
+    #   region: us-west-2
+
+    # Inventory parameters to support querying AWS using boto profiles
+    # - type: aws
+    #   name: user-defined name (must be unique)
+    #   profile: boto profile name
     #   region: us-west-2
 
     # All inventory parameters to support querying New Relic
