@@ -1,12 +1,13 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """bridgy
 SSH + TMUX + SSHFS + CLOUD INVENTORY SEARCH.
 Fuzzy search for one or more systems then ssh into all matches, organized
 by tmux.
 
 Usage:
-  bridgy ssh [-adsuvw] [-l LAYOUT] <host>...
-  bridgy ssh [-dsuv] --tmux <host>
+  bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
+  bridgy ssh [-duv] <host>
   bridgy list-inventory
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
@@ -38,10 +39,15 @@ Options:
 
 Configuration Options are in ~/.bridgy/config.yml
 """
-import sys
+import sys  
+
+reload(sys)  
+sys.setdefaultencoding('utf8')
+
 import os
 import logging
 import inquirer
+from inquirer.themes import GreenPassion
 import coloredlogs
 import collections
 from tabulate import tabulate
@@ -57,6 +63,30 @@ import bridgy.utils as utils
 logger = logging.getLogger()
 
 
+
+class CustomTheme(GreenPassion):
+    
+    def __init__(self):
+        super(CustomTheme, self).__init__()
+
+        selection_color = utils.term.bold_bright_cyan + utils.term.reverse
+        selected_color  = utils.term.bold_bright_yellow
+
+        self.Question.mark_color = utils.term.bold_bright_cyan
+        self.Question.brackets_color = utils.term.bold_bright_cyan
+        self.Question.default_color = utils.term.yellow
+        self.Checkbox.selection_color = selection_color
+        self.Checkbox.selection_icon = utils.term.normal + ' ' + selection_color # ❯
+        self.Checkbox.selected_icon = '◉ '
+        self.Checkbox.selected_color = selected_color
+        self.Checkbox.unselected_color = utils.term.normal
+        self.Checkbox.unselected_icon = '🔿 ' # 🞅 ⭘ 🔿 🔾 
+        self.List.selection_color = selection_color
+        self.List.selection_cursor = utils.term.normal + ' ' + selection_color# ❯
+        self.List.unselected_color = utils.term.normal
+
+THEMER = CustomTheme()
+
 def prompt_targets(question, targets=None, instances=None, multiple=True, config=None):
     if targets == None and instances == None or targets != None and instances != None:
         raise RuntimeError("Provide exactly one of either 'targets' or 'instances'")
@@ -71,28 +101,30 @@ def prompt_targets(question, targets=None, instances=None, multiple=True, config
         return instances
 
     display_instances = collections.OrderedDict()
+    # TODO: fix cap'd length... it's pretty arbitraty
+    maxLen = min(max([len(instance.name) for instance in instances]), 55)
     for instance in sorted(instances):
-        display = "%-55s (%s)" % (instance.name, instance.address)
+        display = str("%-" + str(maxLen+3) + "s (%s)") % (instance.name, instance.address)
         display_instances[display] = instance
 
     questions = []
 
     if multiple:
         question = inquirer.Checkbox('instance',
-                                     message="%s%s%s (space to multi-select, enter to finish)" % (utils.color.BOLD, question, utils.color.NORMAL),
+                                     message="%s%s%s (space to multi-select, enter to finish)" % (utils.term.bold + utils.term.underline, question, utils.term.normal),
                                      choices=list(display_instances.keys()) + ['all'],
                                      # default='all'
                                      )
     else:
         question = inquirer.List('instance',
-                                 message="%s%s%s (enter to select)" % (utils.color.BOLD, question, utils.color.NORMAL),
+                                 message="%s%s%s (enter to select)" % (utils.term.bold, question, utils.term.normal),
                                  choices=list(display_instances.keys()),
                                  )
     questions.append(question)
 
     answers = None
     try:
-        answers = inquirer.prompt(questions, raise_keyboard_interrupt=True)
+        answers = inquirer.prompt(questions, theme=THEMER, raise_keyboard_interrupt=True)
     except KeyboardInterrupt:
         logger.error("Cancelled by user")
         sys.exit(1)
@@ -299,6 +331,10 @@ def main():
         args['-v'] = True
         coloredlogs.install(fmt='%(message)s', level='DEBUG')
         logger.warn("Performing dry run, no actions will be taken.")
+
+    # why doesn't docopt pick up on this?
+    if args['-t']:
+        args['--tmux'] = True
 
     if args['--version']:
         logger.info(version)

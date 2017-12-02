@@ -1,7 +1,8 @@
 PyYAML
 requests
 docopt
-inquirer
+blessings
+inquirer>=2.2.0
 fuzzywuzzy
 boto3
 placebo
