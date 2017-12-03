@@ -1,6 +1,7 @@
 # bridgy
 
-![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)  (***WIP/beta***)
+![Image](https://api.travis-ci.org/wagoodman/bridgy.svg?branch=master)  [![PyPI version](https://badge.fury.io/py/bridgy.svg)](https://badge.fury.io/py/bridgy)
+(***WIP/beta***)
 
 **TL;DR**: bridgy = ssh + tmux + sshfs + cloud inventory search
 
