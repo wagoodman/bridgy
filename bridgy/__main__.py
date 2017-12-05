@@ -47,7 +47,7 @@ sys.setdefaultencoding('utf8')
 import os
 import logging
 import inquirer
-from inquirer.themes import GreenPassion
+from inquirer.themes import Theme
 import coloredlogs
 import collections
 from tabulate import tabulate
@@ -64,25 +64,25 @@ logger = logging.getLogger()
 
 
 
-class CustomTheme(GreenPassion):
+class CustomTheme(Theme):
     
     def __init__(self):
         super(CustomTheme, self).__init__()
 
-        selection_color = utils.term.bold_bright_cyan + utils.term.reverse
+        selection_color = utils.term.bold_bright_cyan
         selected_color  = utils.term.bold_bright_yellow
 
         self.Question.mark_color = utils.term.bold_bright_cyan
         self.Question.brackets_color = utils.term.bold_bright_cyan
         self.Question.default_color = utils.term.yellow
         self.Checkbox.selection_color = selection_color
-        self.Checkbox.selection_icon = utils.term.normal + ' ' + selection_color # ❯
-        self.Checkbox.selected_icon = '◉ '
+        self.Checkbox.selection_icon = '‣'# ❯
+        self.Checkbox.selected_icon = '◉ ' #✔⬢◉
         self.Checkbox.selected_color = selected_color
         self.Checkbox.unselected_color = utils.term.normal
-        self.Checkbox.unselected_icon = '🔿 ' # 🞅 ⭘ 🔿 🔾 
+        self.Checkbox.unselected_icon = '○ ' #▢ ○ ⬡ 🞅 ⭘ 🔿 🔾 
         self.List.selection_color = selection_color
-        self.List.selection_cursor = utils.term.normal + ' ' + selection_color# ❯
+        self.List.selection_cursor = '‣' # ❯
         self.List.unselected_color = utils.term.normal
 
 THEMER = CustomTheme()
