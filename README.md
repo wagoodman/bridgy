@@ -18,6 +18,7 @@ ssh into all matching instances via tmux.
   - [x] CSV
   - [ ] Ansible inventory
 - [x] Search against multiple inventory sources simultaneously
+- [x] Connect to inventory sources via a bastion/jumpbox
 - [x] Fuzzy search against the inventory
 - [x] Prompt for single/multi selection for matched hosts in inventory
 - [x] Open multiple ssh connections via tmux (splits or tabs)
@@ -92,6 +93,15 @@ $ bridgy mount awesomebox:/appdir
    o qa-myawesomeboxname                    (10.10.63.13)
 
 Mounted dev-myawesomeboxname:/tmp at ~/.bridgy/mounts/dev-myawesomeboxname
+```
+
+Need to connect to your boxes via a jumpbox? Drop in your bastion connection information in the yaml config:
+```
+bastion:
+  user: some-username
+  address: some-ip-or-host
+  # optional ssh arguments
+  options: -C -o ServerAliveInterval=255 -o FingerprintHash=sha256 -o TCPKeepAlive=yes -o ForwardAgent=yes -p 22222
 ```
 
 Want to perform arbitrary tasks? Drop in an ansible playbook in config (~/.bridgy/config.yml), reference it by name:
