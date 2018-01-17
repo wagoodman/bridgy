@@ -85,7 +85,7 @@ def test_newrelic_instances():
 
     newrelic_obj = NewRelicInventory('account_number','api_key','/tmp/dummy/path')
     instances = newrelic_obj.instances()
-    expected_instances = [Instance(name=u'ip-172-16-223-200', address=u'172.16.223.200', source='newrelic'),
-                          Instance(name=u'i-04267e627f88362ed-DEV-self-formsvc', address=u'172.16.221.211', source='newrelic'),
-                          Instance(name=u'i-0f9a3f0d9399a6c17-PROD-prfsvclmt', address=u'172.16.225.232', source='newrelic')]
+    expected_instances = [Instance(name=u'ip-172-16-223-200', address=u'172.16.223.200', source='acct:account_number (newrelic)'),
+                          Instance(name=u'i-04267e627f88362ed-DEV-self-formsvc', address=u'172.16.221.211', source='acct:account_number (newrelic)'),
+                          Instance(name=u'i-0f9a3f0d9399a6c17-PROD-prfsvclmt', address=u'172.16.225.232', source='acct:account_number (newrelic)')]
     assert set(instances) == set(expected_instances)

@@ -2,6 +2,8 @@ import abc
 import warnings
 import collections
 
+from bridgy.error import MissingBastionHost
+
 with warnings.catch_warnings():
     # Thiw warns about using the slow implementation of SequenceMatcher
     # instead of the python-Levenshtein module, which requires compilation.
@@ -10,6 +12,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from fuzzywuzzy import fuzz
 
+Bastion = collections.namedtuple("Bastion", "destination options")
 Instance = collections.namedtuple("Instance", "name address aliases source")
 # allow there to be optional kwargs that default to None
 Instance.__new__.__defaults__ = (None,) * len(Instance._fields)
@@ -18,10 +21,27 @@ class InventorySource(object):
     __metaclass__ = abc.ABCMeta
 
     name = "Invalid"
+    bastion = None
 
     def __init__(self, *args, **kwargs):
         if 'name' in kwargs:
             self.name = "%s (%s)" % (kwargs['name'], self.name)
+
+        if 'bastion' in kwargs:
+            if 'address' not in kwargs['bastion']:
+                raise MissingBastionHost
+
+            if 'user' in kwargs['bastion']:
+                destination = '{user}@{host}'.format(user=kwargs['bastion']['user'],
+                                                     host=kwargs['bastion']['address'])
+            else:
+                destination = kwargs['bastion']['address']
+
+            bastion_options = ''
+            if 'options' in kwargs['bastion']:
+                bastion_options = kwargs['bastion']['options']
+            
+            self.bastion = Bastion(destination=destination, options=bastion_options)
 
     @abc.abstractmethod
     def update(self): pass

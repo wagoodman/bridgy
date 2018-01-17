@@ -14,6 +14,9 @@ class NewRelicInventory(InventorySource):
     url = "https://insights-api.newrelic.com/v1/accounts/{}/query?nrql={}"
 
     def __init__(self, account_number, insights_query_api_key, data_path, proxies=None, **kwargs):
+        if 'name' not in kwargs:
+            kwargs['name'] = "acct:"+str(account_number)
+
         super(NewRelicInventory, self).__init__(account_number, insights_query_api_key, data_path, proxies, **kwargs)
 
         self.account_number = account_number

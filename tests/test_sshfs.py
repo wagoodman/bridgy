@@ -22,7 +22,7 @@ import os
 
 from bridgy.command import Sshfs
 from bridgy.inventory import Instance
-from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost, BadRemoteDir
+from bridgy.error import BadInstanceError, BadConfigError, MissingBastionHost, BadRemoteDir
 from bridgy.config import Config
 
 MTAB = u"""\

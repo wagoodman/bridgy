@@ -9,6 +9,18 @@ from bridgy.inventory.aws import AwsInventory
 from bridgy.config import Config
 
 
+def test_set_inventory_bastion(mocker):
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    cache_dir = os.path.join(test_dir, 'aws_stubs')
+
+    aws_obj = AwsInventory(cache_dir=cache_dir, access_key_id='access_key_id',
+                           secret_access_key='secret_access_key', session_token='session_token',
+                           region='region', bastion={'address': 'someaddr', 'user': 'someuser', 'options': 'someoptions'})
+
+
+    assert aws_obj.bastion.destination == 'someuser@someaddr'
+    assert aws_obj.bastion.options == 'someoptions'
+
 def test_inclusion_filtering(mocker):
     test_dir = os.path.dirname(os.path.abspath(__file__))
     cache_dir = os.path.join(test_dir, 'aws_stubs')

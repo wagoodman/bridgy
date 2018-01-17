@@ -32,21 +32,9 @@ class Config(ConfigBase):
         return CONFIG_TEMPLATE_NAME
 
     def verify(self):
-
-        if self.dig('inventory', 'source') == None:
-            logger.error("No inventory source specified (%s):" % self.path)
-            sys.exit(1)
-        
-        if self.dig('inventory', 'include_pattern') != None and self.dig('inventory', 'exclude_pattern') != None:
-            logger.error("'exclude_pattern' and 'include_pattern' are mutually exclusive")
-            sys.exit(1)
+        super(Config, self).verify()
 
         for source, srcCfg in self.sources():
-            # verify each source here
-            if source == 'newrelic':
-                if 'insights_query_api_key' in srcCfg and srcCfg['insights_query_api_key'] == "API_KEY":
-                    logger.error("New Relic inventory selected but no API key was specified: %s" % self.path)
-                    sys.exit(1)
             if source == 'aws':
                 if 'name' not in srcCfg:
                     logger.error("AWS inventory sources must specify name.")

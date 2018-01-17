@@ -34,8 +34,30 @@ class ConfigBase(object):
     @abc.abstractproperty
     def sources(self): pass
 
-    @abc.abstractmethod
-    def verify(self): pass
+    def verify(self): 
+        if self.dig('inventory', 'source') == None:
+            logger.error("No inventory source specified (%s):" % self.path)
+            sys.exit(1)
+
+        if self.dig('inventory', 'include_pattern') != None and self.dig('inventory', 'exclude_pattern') != None:
+            logger.error("'exclude_pattern' and 'include_pattern' are mutually exclusive")
+            sys.exit(1)
+
+        names = []
+        dupNames = []
+        for source, srcCfg in self.sources():
+            if 'name' in srcCfg and srcCfg['name'] in names:
+                dupNames.append(srcCfg['name'])
+
+            # verify each source here
+            if source == 'newrelic':
+                if 'insights_query_api_key' in srcCfg and srcCfg['insights_query_api_key'] == "API_KEY":
+                    logger.error("New Relic inventory selected but no API key was specified: %s" % self.path)
+                    sys.exit(1)
+
+        if len(dupNames) > 0:
+            logger.error("Duplicate inventory source names detected: %s" % ', '.join(dupNames))
+            sys.exit(1)
 
     @property
     def config_template_contents(self): 

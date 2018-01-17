@@ -1,10 +1,12 @@
 import pytest
 import shlex
 import re
+import os
 
 from bridgy.command import Ssh
-from bridgy.inventory import Instance
-from bridgy.command import BadInstanceError, BadConfigError, MissingBastionHost
+from bridgy.inventory import InventorySet, Instance, inventory
+from bridgy.inventory.aws import AwsInventory
+from bridgy.error import BadInstanceError, BadConfigError, MissingBastionHost
 from bridgy.config import Config
 
 instance = Instance('name', 'address.com')

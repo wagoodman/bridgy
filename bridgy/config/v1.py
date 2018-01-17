@@ -16,8 +16,10 @@ CONFIG_TEMPLATE_NAME = 'sample_config_1.yml'
 class Config(ConfigBase):
 
     def sources(self):
-        source = self.dig('inventory', 'source')
-        return [ (source, self[source],) ]
+        srcCfg = self.dig('inventory', 'source')
+        if srcCfg:
+            return [ (srcCfg['type'], srcCfg,) ]
+        return []
 
     @property
     def version(self):
@@ -28,19 +30,11 @@ class Config(ConfigBase):
         return CONFIG_TEMPLATE_NAME
 
     def verify(self):
-        source = self.dig('inventory', 'source')
-        if source == None:
-            logger.error("No inventory source specified (%s):" % self.path)
-            sys.exit(1)
+        super(Config, self).verify()
 
-        if source == 'newrelic' and self.dig('newrelic', 'insights_query_api_key') == "API_KEY":
-            logger.error("New Relic inventory selected but no API key was specified: %s" % self.path)
-            sys.exit(1)
+        for source, srcCfg in self.sources():
+            if source not in srcCfg.keys():
+                logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.path))
+                sys.exit(1)
 
-        if source not in self.conf.keys():
-            logger.error("No inventory-specific section specified for %s source (%s):" % (repr(source), self.path))
-            sys.exit(1)
 
-        if self.dig('inventory', 'include_pattern') != None and self.dig('inventory', 'exclude_pattern') != None:
-            logger.error("'exclude_pattern' and 'include_pattern' are mutually exclusive")
-            sys.exit(1)

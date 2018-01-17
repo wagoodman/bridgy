@@ -5,7 +5,8 @@ import logging
 from functools import partial
 
 from bridgy.utils import memoize
-from bridgy.inventory.source import Instance, InventorySet
+from bridgy.error import MissingBastionHost
+from bridgy.inventory.source import Bastion, Instance, InventorySet
 from bridgy.inventory.aws import AwsInventory
 from bridgy.inventory.flatfile import CsvInventory
 from bridgy.inventory.newrelic import NewRelicInventory
@@ -105,6 +106,31 @@ def instances(config):
     all_instances = inventory(config).instances()
     config_instance_filter = partial(instance_filter, include_re=include_re, exclude_re=exclude_re)
     return list(filter(config_instance_filter, all_instances))
+
+@memoize
+def get_bastion(config, instance):
+    bastion = None
+    
+    for inv in inventory(config).inventories:
+        if inv.name == instance.source and inv.bastion != None:
+            bastion = inv.bastion
+
+    if bastion == None and 'bastion' in config:
+        if not config.dig('bastion', 'address'):
+            raise MissingBastionHost
+
+        # build a destination from possible config combinations
+        if config.dig('bastion', 'user'):
+            destination = '{user}@{host}'.format(user=config.dig('bastion', 'user'),
+                                                 host=config.dig('bastion', 'address'))
+        else:
+            destination = config.dig('bastion', 'address')
+
+        bastion_options = config.dig('bastion', 'options') or ''
+
+        bastion = Bastion(destination=destination, options=bastion_options)
+
+    return bastion
 
 def search(config, targets):
     fuzzy = False

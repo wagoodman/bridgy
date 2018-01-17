@@ -5,7 +5,7 @@ import yaml
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
 
-from bridgy.command.error import *
+from bridgy.error import *
 from bridgy.command import Ssh
 
 logger = logging.getLogger()

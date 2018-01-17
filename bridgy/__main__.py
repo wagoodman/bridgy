@@ -293,7 +293,7 @@ def run_handler(args, config):
         desired_instances.append(instance)
 
     if len(not_found) > 0:
-        logger.error("Unable to find instancesL %s" % ", ".join(not_found))
+        logger.error("Unable to find instances: %s" % ", ".join(not_found))
         sys.exit(1)
 
     if not task_playbook:

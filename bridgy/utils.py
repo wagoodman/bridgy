@@ -1,4 +1,5 @@
 import logging
+import uuid
 import sys
 import os
 
@@ -36,6 +37,9 @@ class SupportedPlatforms(object):
 
         if normalized not in self.platforms:
             raise UnsupportedPlatform('Unsupported platform (%s)' % normalized)
+
+def shortUuid():
+    return str(uuid.uuid4())[:8]
 
 def memoize(f):
     class memodict(dict):

@@ -1,7 +1,6 @@
 import os
 import mock
 import pytest
-import shlex
 
 import bridgy.inventory
 from bridgy.inventory import InventorySet, Instance

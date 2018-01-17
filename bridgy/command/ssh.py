@@ -1,4 +1,5 @@
-from bridgy.command.error import *
+from bridgy.error import *
+from bridgy.inventory import get_bastion
 
 class Ssh(object):
 
@@ -24,22 +25,12 @@ class Ssh(object):
         bastion = ''
         options = ''
 
-        if 'bastion' in self.config:
-            if not self.config.dig('bastion', 'address'):
-                raise MissingBastionHost
+        bastionObj = get_bastion(self.config, self.instance)
 
-            # build a destination from possible config combinations
-            if self.config.dig('bastion', 'user'):
-                destination = '{user}@{host}'.format(user=self.config.dig('bastion', 'user'),
-                                                     host=self.config.dig('bastion', 'address'))
-            else:
-                destination = self.config.dig('bastion', 'address')
-
-            bastion_options = self.config.dig('bastion', 'options') or ''
-
+        if bastionObj != None:
             template = "-o ProxyCommand='ssh {options} -W %h:%p {destination}'"
-            bastion = template.format(options=bastion_options,
-                                      destination=destination)
+            bastion = template.format(options=bastionObj.options,
+                                      destination=bastionObj.destination)
 
         options = self.config.dig('ssh', 'options') or ''
 

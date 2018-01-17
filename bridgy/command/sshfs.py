@@ -1,7 +1,8 @@
 import os
 import sys
 import logging
-from bridgy.command.error import *
+from bridgy.error import *
+from bridgy.inventory import get_bastion
 from bridgy.utils import platform, UnsupportedPlatform
 
 logger = logging.getLogger(__name__)
@@ -42,22 +43,12 @@ class Sshfs(object):
         bastion = ''
         options = ''
 
-        if 'bastion' in self.config:
-            if not self.config.dig('bastion', 'address'):
-                raise MissingBastionHost
+        bastionObj = get_bastion(self.config, self.instance)
 
-            # build a destination from possible config combinations
-            if self.config.dig('bastion', 'user'):
-                destination = '{user}@{host}'.format(user=self.config.dig('bastion', 'user'),
-                                                     host=self.config.dig('bastion', 'address'))
-            else:
-                destination = self.config.dig('bastion', 'address')
-
-            bastion_options = self.config.dig('bastion', 'options') or ''
-
+        if bastionObj != None:
             template = "-o ProxyCommand='ssh {options} -W %h:%p {destination}'"
-            bastion = template.format(options=bastion_options,
-                                      destination=destination)
+            bastion = template.format(options=bastionObj.options,
+                                      destination=bastionObj.destination)
 
         options = self.config.dig('sshfs', 'options') or ''
 

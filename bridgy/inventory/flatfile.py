@@ -12,6 +12,9 @@ class CsvInventory(InventorySource):
     name = 'csv'
 
     def __init__(self, path, fields, delimiter=',', **kwargs):
+        if 'name' not in kwargs and 'file' in kwargs:
+            kwargs['name'] = kwargs['file']
+
         super(CsvInventory, self).__init__(path, fields, delimiter, **kwargs)
 
         self.csv_path = path
