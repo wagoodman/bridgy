@@ -46,7 +46,7 @@ sudo apt install tmux
 # optionally support remote mounts
 sudo apt install sshfs
 ```
-Note: you may still need to add bridgy to your path!
+**Note:** you may still need to add bridgy to your path!
 
 **OSX**
 ```bash

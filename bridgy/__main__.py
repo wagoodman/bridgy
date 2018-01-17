@@ -335,7 +335,7 @@ def main():
         'run': run_handler,
     }
 
-    if 'init' in args:
+    if 'init' in args and args['init']:
         init_handler(args, config)
     else:
         config.read()
