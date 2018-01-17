@@ -1,13 +1,13 @@
 .PHONY: test upload clean bootstrap
 
 test:
-	(. venv/bin/activate; \
+	(. venv3/bin/activate; \
 	tox; \
 	)
 
 upload: test
-	(. venv/bin/activate; \
-	python setup.py sdist upload; \
+	(. venv3/bin/activate; \
+	python3 setup.py sdist upload; \
 	make clean; \
 	)
 
@@ -16,12 +16,12 @@ clean:
 	rm -rf build dist
 
 bootstrap: venv
-	. venv/bin/activate
-	venv/bin/pip install -e .
-	venv/bin/pip install --upgrade tox
+	. venv3/bin/activate
+	venv3/bin/pip install -e .
+	venv3/bin/pip install --upgrade tox
 	make clean
 
 venv:
-	virtualenv venv
-	venv/bin/pip install --upgrade pip
-	venv/bin/pip install --upgrade setuptools
+	virtualenv -p python3 venv3
+	venv3/bin/pip install --upgrade pip
+	venv3/bin/pip install --upgrade setuptools

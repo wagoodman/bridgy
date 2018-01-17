@@ -40,9 +40,9 @@ Options:
 Configuration Options are in ~/.bridgy/config.yml
 """
 import sys  
-
-reload(sys)  
-sys.setdefaultencoding('utf8')
+if sys.version_info < (3, 0):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
 import os
 import logging
