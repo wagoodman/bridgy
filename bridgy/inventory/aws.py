@@ -55,9 +55,9 @@ class AwsInventory(InventorySource):
 
                 # try to find the best dns/ip address to reach this box
                 address = None
-                if instance['PublicDnsName']:
+                if instance.get('PublicDnsName'):
                     address = instance['PublicDnsName']
-                elif instance['PrivateIpAddress']:
+                elif instance.get('PrivateIpAddress'):
                     address = instance['PrivateIpAddress']
 
                 # try to find the best field to match a name against
