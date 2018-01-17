@@ -6,6 +6,7 @@ Fuzzy search for one or more systems then ssh into all matches, organized
 by tmux.
 
 Usage:
+  bridgy init
   bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
   bridgy ssh [-duv] <host>
   bridgy list-inventory
@@ -303,6 +304,14 @@ def run_handler(args, config):
     task = RunAnsiblePlaybook(task_name, task_playbook[0], config, desired_instances)
     task.run()
 
+@utils.SupportedPlatforms('linux', 'windows', 'osx')
+def init_handler(args, config):
+    if args['-d']:
+        return
+    if config.create():
+        logger.info("Config created! Now configure one or more inventory sources in %s" % config.path)
+    else:
+        logger.info("Config already exists at %s" % config.path)
 
 def main():
     coloredlogs.install(fmt='%(message)s')
@@ -312,33 +321,9 @@ def main():
         sys.exit(1)
 
     config = cfg.Config()
-    config.create()
-    config.read()
-    config.verify()
 
     version = 'bridgy %s' % __version__
     args = docopt(__doc__, version=version)
-
-    if not tmux.is_installed():
-        if args ['--tmux'] or config.dig('ssh', 'tmux'):
-            logger.warn("Tmux not installed. Cannot support split screen.")
-        args['--tmux'] = False
-
-    if args['-v']:
-        coloredlogs.install(fmt='%(message)s', level='DEBUG')
-
-    if args['-d']:
-        args['-v'] = True
-        coloredlogs.install(fmt='%(message)s', level='DEBUG')
-        logger.warn("Performing dry run, no actions will be taken.")
-
-    # why doesn't docopt pick up on this?
-    if args['-t']:
-        args['--tmux'] = True
-
-    if args['--version']:
-        logger.info(version)
-        sys.exit(0)
 
     opts = {
         'ssh': ssh_handler,
@@ -350,13 +335,40 @@ def main():
         'run': run_handler,
     }
 
-    for opt, handler in list(opts.items()):
-        if args[opt]:
-            try:
-                handler(args, config)
-            except utils.UnsupportedPlatform as ex:
-                logger.error(ex.message)
-                sys.exit(1)
+    if 'init' in args:
+        init_handler(args, config)
+    else:
+        config.read()
+        config.verify()
+
+        if not tmux.is_installed():
+            if args ['--tmux'] or config.dig('ssh', 'tmux'):
+                logger.warn("Tmux not installed. Cannot support split screen.")
+            args['--tmux'] = False
+
+        if args['-v']:
+            coloredlogs.install(fmt='%(message)s', level='DEBUG')
+
+        if args['-d']:
+            args['-v'] = True
+            coloredlogs.install(fmt='%(message)s', level='DEBUG')
+            logger.warn("Performing dry run, no actions will be taken.")
+
+        # why doesn't docopt pick up on this?
+        if args['-t']:
+            args['--tmux'] = True
+
+        if args['--version']:
+            logger.info(version)
+            sys.exit(0)
+
+        for opt, handler in list(opts.items()):
+            if args[opt]:
+                try:
+                    handler(args, config)
+                except utils.UnsupportedPlatform as ex:
+                    logger.error(ex.message)
+                    sys.exit(1)
 
 if __name__ == '__main__':
     main()

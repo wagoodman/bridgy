@@ -79,14 +79,15 @@ class ConfigBase(object):
         return os.path.exists(config_file)
 
     def create(self):
+        created = False
         if not self.exists():
             config_file = os.path.expanduser(self.path)
-            logging.getLogger().info("Creating %s" % self.path)
             parent_dir = os.path.dirname(config_file)
             if not os.path.exists(parent_dir):
                 os.mkdir(parent_dir)
-            with open(config_file, 'w') as fh:
+            with open(config_file, 'wb') as fh:
                 fh.write(self.config_template_contents)
+            created = True
 
         inventory_cache = os.path.expanduser(self.inventory)
         if not os.path.exists(inventory_cache):
@@ -103,6 +104,8 @@ class ConfigBase(object):
         mount_path = os.path.expanduser(self.mount)
         if not os.path.exists(mount_path):
             os.mkdir(mount_path)
+        
+        return created
 
     def inventoryDir(self, source, name=''):
         if source not in list(inventory.SOURCES.keys()):
