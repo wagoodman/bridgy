@@ -56,7 +56,7 @@ pip install --user bridgy --ignore-installed six
 brew install tmux
 
 # optionally support remote mounts
-brew install osxfuse
+brew cask install osxfuse
 brew install sshfs
 ```
 
