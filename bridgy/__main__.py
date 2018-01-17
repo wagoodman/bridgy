@@ -19,6 +19,7 @@ Usage:
   bridgy --version
 
 Sub-commands:
+  init          create the ~/.bridgy/config.yml
   ssh           ssh into the selected host(s)
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts

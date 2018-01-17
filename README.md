@@ -69,18 +69,18 @@ brew install sshfs
 ## Getting started
 After installing, create a configuration file by running
 ```bash
-bridgy init
+$ bridgy init
 ```
 This will create a default `~/.bridgy/config.yml` file for you. From there you need to configure inventory sources and other options:
 
 ```yaml
 config-schema: 2
 inventory:
-
   source:
 
     - type: csv
       name: on-site servers
+      # CSV files are placed in ~/.bridgy/inventory/csv
       file: somefile.csv
       # requires at least name and address
       fields: name, address
@@ -101,7 +101,11 @@ ssh:
 ```
 Now you can ssh into a system referenced from the given inventory sources:
 ```bash
-bridgy ssh someserver
+# without tmux
+$ bridgy ssh someserver
+
+# with tmux (or set the ssh.tmux=true config option to always use tmux)
+$ bridgy ssh -t someserver
 ```
 That's just to get you started, there is plenty more you can do though!
 
@@ -239,6 +243,7 @@ inventory:
     # Example with a CSV
     - type: csv
       name: On-site
+      # CSV files are placed in ~/.bridgy/inventory/csv
       file: primary-site.csv
       delimiter: '|'
       # requires at least name and address
@@ -278,21 +283,35 @@ inventory:
 # define ssh behavior and preferences
 ssh:
   user: awesome-user
+  # Any valid ssh cli options you would specify to SSH (optional)
   options: -C -o ServerAliveInterval=255
+  # Run a command upon logging into any host (optional)
   command: sudo -i su - another_user -s /bin/bash
-  tmux: false
+  # Use Tmux to wrap all ssh sessions (optional)
+  tmux: true
 
+
+# This specifies any SSHFS options for mounting remote directories
 sshfs:
+  # Any sshfs option that you would specify to sshfs (optional)
+  # Tip: if you need to be another user on the remote system you can do so via sudo:
+  # options: -o sftp_server="/usr/bin/sudo /usr/lib/openssh/sftp-server"
   options: -o auto_cache,reconnect,no_readahead -C -o TCPKeepAlive=yes -o ServerAliveInterval=255 -o StrictHostKeyChecking=no
 
 # configure your bastion here if it applies to all of your inventory sources
 bastion:
-  user: jump-username
-  address: kiwibox
+  # User to use when SSHing into the bastion host (optional)
+  user: johnybgoode
+  # Address of the bastion host
+  address: zest
+  # Any valid cli options you would specify to SSH (optional)
   options: -C -o ServerAliveInterval=255
 
-# define tmux layouts and (optional) canned commands
+
 tmux:
+  # You can make multiple panes to a single host by specifying a layout definition. Simply
+  # define each tmux command to run and an optional command to run in that pane.
+  # Use these layouts by name with the -l cli option (bridgy ssh -l somename host...)
   layout:
     # bridgy ssh -l example host...
     example:
@@ -332,6 +351,7 @@ run:
 
 ## Usage
 ```
+  bridgy init
   bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
   bridgy ssh [-duv] <host>
   bridgy list-inventory
@@ -344,6 +364,7 @@ run:
   bridgy --version
 
 Sub-commands:
+  init          create the ~/.bridgy/config.yml
   ssh           ssh into the selected host(s)
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts
