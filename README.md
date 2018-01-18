@@ -45,6 +45,9 @@ sudo apt install tmux
 
 # optionally support remote mounts
 sudo apt install sshfs
+
+# put this into your ~/.bashrc (pip install --user does not put bins in the 'right' spot for everyone: https://github.com/pypa/pip/issues/3813)
+export PATH=${HOME}/.local/bin:$PATH
 ```
 **Note:** you may still need to add bridgy to your path!
 
@@ -59,6 +62,9 @@ brew install tmux
 # optionally support remote mounts
 brew cask install osxfuse
 brew install sshfs
+
+# put this into your ~/.bash_profile (pip install --user does not put bins in the 'right' spot for everyone: https://github.com/pypa/pip/issues/3813)
+export PATH=${HOME}/.local/bin:$PATH
 ```
 
 **Windows**
