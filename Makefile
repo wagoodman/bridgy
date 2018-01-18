@@ -10,13 +10,17 @@ build: clean
 	python3 setup.py sdist build; \
 	)
 
-upload: test
+release: _upload tag
+
+_upload: test
 	(. venv3/bin/activate; \
-	python3 setup.py sdist upload && \
-	git tag v`cat bridgy/version.py | grep __version__ | awk -F"=" '{print $$2}' | sed -e 's/^[ \t]*//' | tr -d "'"` && \
-	git push --tags ; \ 
+	python3 setup.py sdist upload ; \
 	make clean; \
 	)
+
+tag:
+	git tag v`cat bridgy/version.py | grep __version__ | awk -F"=" '{print $$2}' | sed -e 's/^[ \t]*//' | tr -d "'"` && \
+	git push --tags 
 
 bootstrap3: venv3
 	. venv3/bin/activate
