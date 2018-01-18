@@ -12,13 +12,11 @@ build: clean
 
 upload: test
 	(. venv3/bin/activate; \
-	python3 setup.py sdist upload; \
+	python3 setup.py sdist upload && \
+	git tag v`cat bridgy/version.py | grep __version__ | awk -F"=" '{print $$2}' | sed -e 's/^[ \t]*//' | tr -d "'"` && \
+	git push --tags ; \ 
 	make clean; \
 	)
-
-clean:
-	rm -f MANIFEST
-	rm -rf build dist
 
 bootstrap3: venv3
 	. venv3/bin/activate
@@ -41,3 +39,7 @@ venv2:
 	virtualenv -p python2 venv2
 	venv2/bin/pip install --upgrade pip
 	venv2/bin/pip install --upgrade setuptools
+
+clean:
+	rm -f MANIFEST
+	rm -rf build dist
