@@ -1,0 +1,2 @@
+include README.md
+include bridgy/config/samples/*.yml

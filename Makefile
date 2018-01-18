@@ -5,6 +5,11 @@ test:
 	tox; \
 	)
 
+build: clean
+	(. venv3/bin/activate; \
+	python3 setup.py sdist build; \
+	)
+
 upload: test
 	(. venv3/bin/activate; \
 	python3 setup.py sdist upload; \
