@@ -312,7 +312,7 @@ def init_handler(args, config):
     if config.create():
         logger.info("Config created! Now configure one or more inventory sources in %s" % config.path)
     else:
-        logger.info("Config already exists at %s" % config.path)
+        logger.error("Config already exists at %s" % config.path)
 
 def main():
     coloredlogs.install(fmt='%(message)s')
@@ -339,6 +339,10 @@ def main():
     if 'init' in args and args['init']:
         init_handler(args, config)
     else:
+        if not config.exists():
+            logger.error("Config missing, run 'bridgy init' to create one.")
+            sys.exit(1)
+
         config.read()
         config.verify()
 
