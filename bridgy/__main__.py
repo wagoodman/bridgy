@@ -259,7 +259,7 @@ def list_inventory_handler(args, config):
     instances = []
     for ip, name, aliases, source in inventory.instances(config):
         if aliases:
-            instances.append( (ip, name, ', '.join(aliases), source) )
+            instances.append( (ip, name, '\n'.join(aliases), source) )
         else:
             instances.append( (ip, name, '--- None ---', source) )
     logger.info(tabulate(instances, headers=['Name', 'Address/Dns', 'Aliases', 'Source']))

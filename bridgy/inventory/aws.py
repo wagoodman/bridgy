@@ -65,8 +65,9 @@ class AwsInventory(InventorySource):
                 if 'Tags' in list(instance.keys()):
                     for tagDict in instance['Tags']:
                         if tagDict['Key'] == 'Name':
+                            aliases.insert(0, tagDict['Value'])
+                        else:
                             aliases.append(tagDict['Value'])
-                            break
 
                 if instance['PublicDnsName']:
                     aliases.append(instance['PublicDnsName'])
