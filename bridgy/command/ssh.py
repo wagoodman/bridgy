@@ -33,9 +33,9 @@ class Ssh(object):
             bastion = template.format(options=bastionObj.options,
                                       destination=bastionObj.destination)
 
-        options = self.config.dig('ssh', 'options')
+        options = self.config.dig('ssh', 'options') or ''
 
-        return '{} {} -t '.format(bastion, options)
+        return '{} {} -t'.format(bastion, options)
 
 
     @property
