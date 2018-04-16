@@ -3,7 +3,7 @@ from bridgy.inventory import get_bastion
 
 class Ssh(object):
 
-    def __init__(self, config, instance):
+    def __init__(self, config, instance, command=''):
         if not hasattr(config, '__getitem__'):
             raise BadConfigError
         if not isinstance(instance, tuple):
@@ -11,6 +11,7 @@ class Ssh(object):
 
         self.config = config
         self.instance = instance
+        self.custom_command = command
 
     @property
     def destination(self):
@@ -32,13 +33,14 @@ class Ssh(object):
             bastion = template.format(options=bastionObj.options,
                                       destination=bastionObj.destination)
 
-        options = self.config.dig('ssh', 'options') or ''
+        options = self.config.dig('ssh', 'options')
 
-        return '{} {}'.format(bastion, options)
+        return '{} {} -t '.format(bastion, options)
 
 
     @property
     def command(self):
-        cmd = 'ssh {options} {destination}'
+        cmd = 'ssh {options} {destination} {command}'
         return cmd.format(destination=self.destination,
-                          options=self.options )
+                          options=self.options,
+                          command=self.custom_command)

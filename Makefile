@@ -20,7 +20,7 @@ _upload: test
 
 tag:
 	git tag v`cat bridgy/version.py | grep __version__ | awk -F"=" '{print $$2}' | sed -e 's/^[ \t]*//' | tr -d "'"` && \
-	git push --tags 
+	git push --tags
 
 bootstrap3: venv3
 	. venv3/bin/activate

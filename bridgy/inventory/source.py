@@ -12,8 +12,13 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from fuzzywuzzy import fuzz
 
+class InstanceType:
+    ALL = 'ALL'
+    VM = 'VM'
+    CONTAINER = 'CONTAINER'
+
 Bastion = collections.namedtuple("Bastion", "destination options")
-Instance = collections.namedtuple("Instance", "name address aliases source")
+Instance = collections.namedtuple("Instance", "name address aliases source container_id type")
 # allow there to be optional kwargs that default to None
 Instance.__new__.__defaults__ = (None,) * len(Instance._fields)
 
@@ -40,7 +45,7 @@ class InventorySource(object):
             bastion_options = ''
             if 'options' in kwargs['bastion']:
                 bastion_options = kwargs['bastion']['options']
-            
+
             self.bastion = Bastion(destination=destination, options=bastion_options)
 
     @abc.abstractmethod
@@ -63,7 +68,7 @@ class InventorySource(object):
                         matchedInstances.add((100, instance))
                     elif partial and host.lower() in name.lower():
                         matchedInstances.add((99, instance))
-                    
+
                     if fuzzy:
                         score = fuzz.partial_ratio(host.lower(), name.lower())
                         if score > 85 or host.lower() in name.lower():

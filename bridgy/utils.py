@@ -2,6 +2,7 @@ import logging
 import uuid
 import sys
 import os
+import re
 
 from blessings import Terminal
 
@@ -51,3 +52,8 @@ def memoize(f):
             ret = self[key] = self.f(*key)
             return ret
     return memodict(f)
+
+def parseIpFromHostname(hostname):
+    match = re.search(r'\d{1,3}[\.\-\_]{1}\d{1,3}[\.\-\_]{1}\d{1,3}[\.\-\_]{1}\d{1,3}', hostname)
+    if match:
+        return match.group().replace('-', '.').replace('_', '.')

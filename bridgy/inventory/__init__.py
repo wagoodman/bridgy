@@ -6,7 +6,7 @@ from functools import partial
 
 from bridgy.utils import memoize
 from bridgy.error import MissingBastionHost
-from bridgy.inventory.source import Bastion, Instance, InventorySet
+from bridgy.inventory.source import Bastion, Instance, InventorySet, InstanceType
 from bridgy.inventory.aws import AwsInventory
 from bridgy.inventory.flatfile import CsvInventory
 from bridgy.inventory.newrelic import NewRelicInventory
@@ -28,13 +28,13 @@ def inventory(config):
 
     for source, srcCfg in config.sources():
         if source == 'aws':
-            # the cache directory for the original v1 config did not separate 
+            # the cache directory for the original v1 config did not separate
             # out multiple aws profiles into subdirectories
             if config.version == 1:
                 cache_dir = config.inventoryDir(AwsInventory.name)
             else:
                 cache_dir = config.inventoryDir(AwsInventory.name, srcCfg['name'])
-            
+
             if not os.path.exists(cache_dir):
                 os.mkdir(cache_dir)
 
@@ -71,9 +71,9 @@ def inventory(config):
             inv = NewRelicInventory(data_path=config.inventoryDir(NewRelicInventory.name),
                                     proxies=proxies,
                                     **srcCfg)
- 
+
             inventorySet.add(inv)
-        
+
     return inventorySet
 
 def instance_filter(instance, include_re=None, exclude_re=None):
@@ -110,7 +110,7 @@ def instances(config):
 @memoize
 def get_bastion(config, instance):
     bastion = None
-    
+
     for inv in inventory(config).inventories:
         if inv.name == instance.source and inv.bastion != None:
             bastion = inv.bastion
@@ -132,7 +132,7 @@ def get_bastion(config, instance):
 
     return bastion
 
-def search(config, targets):
+def search(config, targets, type=InstanceType.ALL):
     fuzzy = False
     if config.dig('inventory', 'fuzzy_search'):
         fuzzy = config.dig('inventory', 'fuzzy_search')
@@ -145,7 +145,11 @@ def search(config, targets):
 
     matched_instances = inventory(config).search(targets, fuzzy=fuzzy)
     config_instance_filter = partial(instance_filter, include_re=include_re, exclude_re=exclude_re)
-    return list(filter(config_instance_filter, matched_instances))
+    filtered_instances = list(filter(config_instance_filter, matched_instances))
+    if type == InstanceType.ALL:
+        return filtered_instances
+    else:
+        return [x for x in filtered_instances if x.type == type]
 
 def update(config):
     inventory(config).update()
