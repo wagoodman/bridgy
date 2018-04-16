@@ -29,12 +29,12 @@ def test_ssh_command_go_case():
         'ssh': {}
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, 'ssh address.com')
+    assert_command_results(sshObj.command, 'ssh -t address.com')
 
 def test_ssh_command_go_case_no_options():
     config = Config({})
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, 'ssh address.com')
+    assert_command_results(sshObj.command, 'ssh -t address.com')
 
 def test_ssh_command_user():
     config = Config({
@@ -43,7 +43,7 @@ def test_ssh_command_user():
         }
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, 'ssh username@address.com')
+    assert_command_results(sshObj.command, 'ssh -t username@address.com')
 
 def test_ssh_command_options():
     config = Config({
@@ -53,7 +53,7 @@ def test_ssh_command_options():
         }
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 username@address.com')
+    assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 -t username@address.com')
 
 def test_ssh_command_no_user():
     config = Config({
@@ -62,7 +62,7 @@ def test_ssh_command_no_user():
         }
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 address.com')
+    assert_command_results(sshObj.command, 'ssh -C -o ServerAliveInterval=255 -t address.com')
 
 def test_ssh_command_bastion_options():
     config = Config({
@@ -72,7 +72,7 @@ def test_ssh_command_bastion_options():
         }
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' address.com")
+    assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -C -o ServerAliveInterval=255 -W %h:%p bastion.com' -t address.com")
 
 def test_ssh_command_bastion_user():
     config = Config({
@@ -82,7 +82,7 @@ def test_ssh_command_bastion_user():
         }
     })
     sshObj = Ssh(config, instance)
-    assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -W %h:%p bastionuser@bastion.com' address.com")
+    assert_command_results(sshObj.command, "ssh -o ProxyCommand='ssh -W %h:%p bastionuser@bastion.com' -t address.com")
 
 def test_ssh_command_bastion_missing_address():
     config = Config({

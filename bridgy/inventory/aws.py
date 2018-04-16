@@ -3,7 +3,7 @@ import boto3
 import placebo
 import logging
 
-from bridgy.inventory.source import InventorySource, Instance
+from bridgy.inventory.source import InventorySource, Instance, InstanceType
 
 logger = logging.getLogger()
 
@@ -82,9 +82,9 @@ class AwsInventory(InventorySource):
                 # take note of this instance
                 if name != None and address != None:
                     if len(aliases) > 0:
-                        instances.append(Instance(name, address, tuple(aliases), self.name))
+                        instances.append(Instance(name, address, tuple(aliases), self.name, None, InstanceType.VM))
                     else:
-                        instances.append(Instance(name, address, self.name))
+                        instances.append(Instance(name, address, None, self.name, None, InstanceType.VM))
 
         return instances
 
