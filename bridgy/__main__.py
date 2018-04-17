@@ -7,16 +7,16 @@ by tmux.
 
 Usage:
   bridgy init
-  bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
-  bridgy ssh [-duv] <host>
-  bridgy exec (-t | --tmux) [-adsuvw] [-l LAYOUT] <container>...
-  bridgy exec [-duv] <container>
-  bridgy list-inventory
+  bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] [-i SOURCE] <host>...
+  bridgy ssh [-duv] [-i SOURCE] <host>
+  bridgy exec (-t | --tmux) [-adsuvw] [-l LAYOUT] [-i SOURCE] <container>...
+  bridgy exec [-duv] [-i SOURCE] <container>
+  bridgy list-inventory [-i SOURCE]
   bridgy list-mounts
-  bridgy mount [-duv] <host>:<remotedir>
-  bridgy unmount [-dv] (-a | <host>...)
+  bridgy mount [-duv] [-i SOURCE] <host>:<remotedir>
+  bridgy unmount [-dv] [-i SOURCE] (-a | <host>...)
   bridgy run <task>
-  bridgy update [-v]
+  bridgy update [-v] [-i SOURCE] 
   bridgy (-h | --help)
   bridgy --version
 
@@ -33,6 +33,7 @@ Sub-commands:
 Options:
   -a        --all            Automatically use all matched hosts.
   -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
+  -i SOURCE --source SOURCE  Search a subset of inventories by name
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
   -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
   -t        --tmux           Open all ssh connections in a tmux session.
@@ -95,12 +96,12 @@ class CustomTheme(Theme):
 
 THEMER = CustomTheme()
 
-def prompt_targets(question, targets=None, instances=None, multiple=True, config=None, type=InstanceType.ALL):
+def prompt_targets(question, targets=None, instances=None, multiple=True, config=None, type=InstanceType.ALL, filter_sources=tuple()):
     if targets == None and instances == None or targets != None and instances != None:
         raise RuntimeError("Provide exactly one of either 'targets' or 'instances'")
 
     if targets:
-        instances = inventory.search(config, targets, type=type)
+        instances = inventory.search(config, targets, filter_sources=filter_sources, type=type)
 
     if len(instances) == 0:
         return []
@@ -156,10 +157,10 @@ def exec_handler(args, config):
 
     if args ['--tmux'] or config.dig('ssh', 'tmux'):
         question = "What containers would you like to exec into?"
-        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS)
+        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS, filter_sources=args['--source'])
     else:
         question = "What containers would you like to exec into?"
-        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS, multiple=False)
+        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS, filter_sources=args['--source'], multiple=False)
 
     if len(targets) == 0:
         logger.info("No matching instances found")
@@ -195,10 +196,10 @@ def ssh_handler(args, config):
 
     if args ['--tmux'] or config.dig('ssh', 'tmux'):
         question = "What instances would you like to ssh into?"
-        targets = prompt_targets(question, targets=args['<host>'], config=config, type=InstanceType.VM)
+        targets = prompt_targets(question, targets=args['<host>'], config=config, type=InstanceType.VM, filter_sources=args['--source'])
     else:
         question = "What instance would you like to ssh into?"
-        targets = prompt_targets(question, targets=args['<host>'], config=config, type=InstanceType.VM, multiple=False)
+        targets = prompt_targets(question, targets=args['<host>'], config=config, type=InstanceType.VM, filter_sources=args['--source'], multiple=False)
 
     if len(targets) == 0:
         logger.info("No matching instances found")
@@ -237,7 +238,7 @@ def mount_handler(args, config):
         sys.exit(1)
 
     desired_target, remotedir = fields
-    instances = inventory.search(config, [desired_target])
+    instances = inventory.search(config, [desired_target], filter_sources=args['--source'])
     sshfs_objs = [Sshfs(config, instance, remotedir, dry_run=args['-d']) for instance in instances]
     unmounted_targets = [obj.instance for obj in sshfs_objs if not obj.is_mounted]
 
@@ -274,13 +275,13 @@ def unmount_handler(args, config):
     question = "What instances would you like to have unmounted?"
 
     if args['-a']:
-        instances = inventory.instances(config)
+        instances = inventory.instances(config, filter_sources=args['--source'])
         sshfs_objs = [Sshfs(config, instance, dry_run=args['-d']) for instance in instances]
         mounted_targets = [obj.instance for obj in sshfs_objs if obj.is_mounted]
         target_instances = mounted_targets
     else:
         desired_targets = args['<host>']
-        instances = inventory.search(config, desired_targets)
+        instances = inventory.search(config, desired_targets, filter_sources=args['--source'])
         sshfs_objs = [Sshfs(config, instance, dry_run=args['-d']) for instance in instances]
         mounted_targets = [obj.instance for obj in sshfs_objs if obj.is_mounted]
         target_instances = prompt_targets(question, instances=mounted_targets, multiple=False, config=config)
@@ -302,7 +303,7 @@ def unmount_handler(args, config):
 @utils.SupportedPlatforms('linux', 'windows', 'osx')
 def list_inventory_handler(args, config):
     instances = []
-    for instance in sorted(inventory.instances(config)):
+    for instance in sorted(inventory.instances(config, filter_sources=args['--source'])):
         if instance.aliases:
             instances.append( (instance.name, instance.address, '\n'.join(instance.aliases), instance.source, instance.type) )
         else:
@@ -316,7 +317,7 @@ def update_handler(args, config):
         return
 
     logger.warn("Updating inventory...")
-    inventory_obj = inventory.inventory(config)
+    inventory_obj = inventory.inventory(config, filter_sources=args['--source'])
     inventory_obj.update()
 
 
@@ -331,7 +332,7 @@ def run_handler(args, config):
     desired_instances = []
     desired_targets = [ x.strip() for x in config.dig('run', task_name)[0]['hosts'].split(',') ]
     for desired_target in desired_targets:
-        instances = inventory.search(config, [desired_target])
+        instances = inventory.search(config, [desired_target], filter_sources=args['--source'])
         if len(instances) == 0:
             not_found.append(desired_target)
             continue
@@ -412,6 +413,11 @@ def main():
         if args['--version']:
             logger.info(version)
             sys.exit(0)
+
+        if args['--source'] is None:
+            args['--source'] = tuple()
+        else:
+            args['--source'] = tuple(args['--source'].split(','))
 
         for opt, handler in list(opts.items()):
             if args[opt]:

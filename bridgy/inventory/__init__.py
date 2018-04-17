@@ -4,7 +4,6 @@ import sys
 import logging
 from functools import partial
 
-from bridgy.utils import memoize
 from bridgy.error import MissingBastionHost
 from bridgy.inventory.source import Bastion, Instance, InventorySet, InstanceType
 from bridgy.inventory.aws import AwsInventory
@@ -22,8 +21,7 @@ SOURCES = {
 }
 
 
-@memoize
-def inventory(config):
+def inventory(config, filter_sources=tuple()):
     inventorySet = InventorySet()
 
     for source, srcCfg in config.sources():
@@ -95,19 +93,17 @@ def instance_filter(instance, include_re=None, exclude_re=None):
     else:
         return True
 
-@memoize
-def instances(config):
+def instances(config, filter_sources=tuple()):
     include_re, exclude_re = None, None
     if config.dig('inventory', 'include_pattern'):
         include_re = re.compile(config.dig('inventory', 'include_pattern'))
     if config.dig('inventory', 'exclude_pattern'):
         exclude_re = re.compile(config.dig('inventory', 'exclude_pattern'))
 
-    all_instances = inventory(config).instances()
+    all_instances = inventory(config).instances(filter_sources=filter_sources)
     config_instance_filter = partial(instance_filter, include_re=include_re, exclude_re=exclude_re)
     return list(filter(config_instance_filter, all_instances))
 
-@memoize
 def get_bastion(config, instance):
     bastion = None
 
@@ -132,7 +128,7 @@ def get_bastion(config, instance):
 
     return bastion
 
-def search(config, targets, type=InstanceType.ALL):
+def search(config, targets, filter_sources=tuple(), type=InstanceType.ALL):
     fuzzy = False
     if config.dig('inventory', 'fuzzy_search'):
         fuzzy = config.dig('inventory', 'fuzzy_search')
@@ -143,7 +139,7 @@ def search(config, targets, type=InstanceType.ALL):
     if config.dig('inventory', 'exclude_pattern'):
         exclude_re = re.compile(config.dig('inventory', 'exclude_pattern'))
 
-    matched_instances = inventory(config).search(targets, fuzzy=fuzzy)
+    matched_instances = inventory(config).search(targets, fuzzy=fuzzy, filter_sources=filter_sources)
     config_instance_filter = partial(instance_filter, include_re=include_re, exclude_re=exclude_re)
     filtered_instances = list(filter(config_instance_filter, matched_instances))
     if type == InstanceType.ALL:

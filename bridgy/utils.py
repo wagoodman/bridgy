@@ -42,17 +42,6 @@ class SupportedPlatforms(object):
 def shortUuid():
     return str(uuid.uuid4())[:8]
 
-def memoize(f):
-    class memodict(dict):
-        def __init__(self, f):
-            self.f = f
-        def __call__(self, *args):
-            return self[args]
-        def __missing__(self, key):
-            ret = self[key] = self.f(*key)
-            return ret
-    return memodict(f)
-
 def parseIpFromHostname(hostname):
     match = re.search(r'\d{1,3}[\.\-\_]{1}\d{1,3}[\.\-\_]{1}\d{1,3}[\.\-\_]{1}\d{1,3}', hostname)
     if match:

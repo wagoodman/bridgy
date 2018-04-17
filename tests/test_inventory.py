@@ -4,7 +4,7 @@ import pytest
 import shlex
 
 import bridgy.inventory
-from bridgy.inventory import Instance, inventory, instances
+from bridgy.inventory import InventorySet, Instance, inventory, instances
 from bridgy.inventory.aws import AwsInventory
 from bridgy.config import Config
 
@@ -34,9 +34,11 @@ def test_inclusion_filtering(mocker):
     aws_obj = AwsInventory(cache_dir=cache_dir, access_key_id='access_key_id',
                            secret_access_key='secret_access_key', session_token='session_token',
                            region='region')
+    inventorySet = InventorySet()
+    inventorySet.add(aws_obj)
 
     mock_inventory = mocker.patch.object(bridgy.inventory, 'inventory')
-    mock_inventory.return_value = aws_obj
+    mock_inventory.return_value = inventorySet
 
     all_instances = instances(config)
 
@@ -61,9 +63,11 @@ def test_exclusion_filtering(mocker):
     aws_obj = AwsInventory(cache_dir=cache_dir, access_key_id='access_key_id',
                            secret_access_key='secret_access_key', session_token='session_token',
                            region='region')
+    inventorySet = InventorySet()
+    inventorySet.add(aws_obj)
 
     mock_inventory = mocker.patch.object(bridgy.inventory, 'inventory')
-    mock_inventory.return_value = aws_obj
+    mock_inventory.return_value = inventorySet
 
     all_instances = instances(config)
 

@@ -31,6 +31,7 @@ class InventorySource(object):
     def __init__(self, *args, **kwargs):
         if 'name' in kwargs:
             self.name = "%s (%s)" % (kwargs['name'], self.name)
+            self.source = kwargs['name']
 
         if 'bastion' in kwargs:
             if 'address' not in kwargs['bastion']:
@@ -102,22 +103,25 @@ class InventorySet(InventorySource):
     def name(self):
         return " + ".join([inventory.name for inventory in self.inventories])
 
-    def update(self):
+    def update(self, filter_sources=tuple()):
         for inventory in self.inventories:
-            inventory.update()
+            if len(filter_sources) == 0 or (len(filter_sources) > 0 and inventory.source in filter_sources):
+                inventory.update()
 
-    def instances(self, stub=True):
+    def instances(self, stub=True, filter_sources=tuple()):
         instances = []
 
         for inventory in self.inventories:
-            instances.extend(inventory.instances())
+            if len(filter_sources) == 0 or (len(filter_sources) > 0 and inventory.source in filter_sources):
+                instances.extend(inventory.instances())
 
         return instances
 
-    def search(self, targets, partial=True, fuzzy=False):
+    def search(self, targets, partial=True, fuzzy=False, filter_sources=tuple()):
         instances = []
 
         for inventory in self.inventories:
-            instances.extend(inventory.search(targets, partial, fuzzy))
+            if len(filter_sources) == 0 or (len(filter_sources) > 0 and inventory.source in filter_sources):
+                instances.extend(inventory.search(targets, partial, fuzzy))
 
         return instances
