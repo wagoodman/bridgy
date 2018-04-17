@@ -46,7 +46,7 @@ class NewRelicInventory(InventorySource):
             data_file.write(
                 json.dumps({
                     InstanceType.VM: json.loads(responseVms.text),
-                    InstanceType.CONTAINER: json.loads(responseContainers.text)
+                    InstanceType.ECS: json.loads(responseContainers.text)
                 })
             )
 
@@ -63,13 +63,13 @@ class NewRelicInventory(InventorySource):
                     hostname = address
                 instances.add(Instance(hostname, address, None, self.name, None, InstanceType.VM))
 
-        for results_dict in data[InstanceType.CONTAINER]['results']:
+        for results_dict in data[InstanceType.ECS]['results']:
             for event_dict in results_dict['events']:
                 container_name = event_dict['containerName']
                 container_id = event_dict['containerId']
                 hostname = event_dict['hostname']
                 address = parseIpFromHostname(hostname)
 
-                instances.add(Instance(container_name, address, None, self.name, container_id, InstanceType.CONTAINER))
+                instances.add(Instance(container_name, address, None, self.name, container_id, InstanceType.ECS))
 
         return list(instances)

@@ -15,7 +15,7 @@ with warnings.catch_warnings():
 class InstanceType:
     ALL = 'ALL'
     VM = 'VM'
-    CONTAINER = 'CONTAINER'
+    ECS = 'ECS'
 
 Bastion = collections.namedtuple("Bastion", "destination options")
 Instance = collections.namedtuple("Instance", "name address aliases source container_id type")

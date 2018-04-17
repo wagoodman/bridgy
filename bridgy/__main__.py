@@ -23,7 +23,7 @@ Usage:
 Sub-commands:
   init          create the ~/.bridgy/config.yml
   ssh           ssh into the selected host(s)
-  exec          exec into the selected container(s) (interactive + tty)
+  exec          exec into the selected container(s) (new relic + ecs only)
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
@@ -156,10 +156,10 @@ def exec_handler(args, config):
 
     if args ['--tmux'] or config.dig('ssh', 'tmux'):
         question = "What containers would you like to exec into?"
-        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.CONTAINER)
+        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS)
     else:
         question = "What containers would you like to exec into?"
-        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.CONTAINER, multiple=False)
+        targets = prompt_targets(question, targets=args['<container>'], config=config, type=InstanceType.ECS, multiple=False)
 
     if len(targets) == 0:
         logger.info("No matching instances found")
