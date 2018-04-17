@@ -1,5 +1,6 @@
 import os
 import boto3
+import shutil
 import placebo
 import logging
 
@@ -14,6 +15,7 @@ class AwsInventory(InventorySource):
     # kwargs: access_key_id, secret_access_key, session_token, region, profile, config_path
     def __init__(self, cache_dir, **kwargs):
         super(AwsInventory, self).__init__(cache_dir, **kwargs)
+        self.cache_dir = cache_dir
 
         # this is an override for the config location (at least useful for testing)
         if 'config_path' in kwargs:
@@ -100,6 +102,11 @@ class AwsInventory(InventorySource):
             self.pill.playback()
             data = self.client.describe_instances(Filters=filters)
         else:
+            # clear cache before updating
+            shutil.rmtree(self.cache_dir)
+            os.makedirs(self.cache_dir, mode=0o755)
+
+            # update
             self.pill.record()
             data = self.client.describe_instances(Filters=filters)
             self.pill.stop()
