@@ -367,16 +367,16 @@ run:
 ## Usage
 ```
   bridgy init
-  bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
-  bridgy ssh [-duv] <host>
-  bridgy exec (-t | --tmux) [-adsuvw] [-l LAYOUT] <container>...
-  bridgy exec [-duv] <container>
-  bridgy list-inventory
+  bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] [-i SOURCE] <host>...
+  bridgy ssh [-duv] [-i SOURCE] <host>
+  bridgy exec (-t | --tmux) [-adsuvw] [-l LAYOUT] [-i SOURCE] <container>...
+  bridgy exec [-duv] [-i SOURCE] <container>
+  bridgy list-inventory [-i SOURCE]
   bridgy list-mounts
-  bridgy mount [-duv] <host>:<remotedir>
-  bridgy unmount [-dv] (-a | <host>...)
+  bridgy mount [-duv] [-i SOURCE] <host>:<remotedir>
+  bridgy unmount [-dv] [-i SOURCE] (-a | <host>...)
   bridgy run <task>
-  bridgy update [-v]
+  bridgy update [-v] [-i SOURCE] 
   bridgy (-h | --help)
   bridgy --version
 
@@ -393,6 +393,7 @@ Sub-commands:
 Options:
   -a        --all            Automatically use all matched hosts.
   -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
+  -i SOURCE --source SOURCE  Search a subset of inventories by name (comma separated for multiple values)
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
   -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
   -t        --tmux           Open all ssh connections in a tmux session.

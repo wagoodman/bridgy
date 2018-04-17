@@ -33,7 +33,7 @@ Sub-commands:
 Options:
   -a        --all            Automatically use all matched hosts.
   -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
-  -i SOURCE --source SOURCE  Search a subset of inventories by name
+  -i SOURCE --source SOURCE  Search a subset of inventories by name (comma separated for multiple values)
   -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
   -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
   -t        --tmux           Open all ssh connections in a tmux session.
