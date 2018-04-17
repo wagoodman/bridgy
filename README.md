@@ -29,7 +29,7 @@ ssh into all matching instances via tmux.
 - [x] Run arbitrary ansible playbooks
 - [x] Push / pull files (via ansible fetch/copy task)
 - [ ] Ssh tunnel to hosts
-- [ ] ECS support (exec to container, search tasks, etc)
+- [x] ECS support (exec to container, currently only via new relic inventory)
 - [x] Python3 support :)
 
 **(Want a feature? Just [create an issue](https://github.com/wagoodman/bridgy/issues/new?labels=enhancement) describing it)**
@@ -229,6 +229,16 @@ prefix-app-srv-13.secrets.yml
 
 ```
 
+Want to exec into a running container in ECS? (only via new relic inventory is supported)
+
+```bash
+$ bridgy exec awesome
+[?] What containers would you like to exec into? (enter to select):
+ > o dev-myawesomecontainer
+   o qa-myawesomecontainer
+```
+
+
 ## Config Reference
 An exhaustive list of options you can put in the config, with some example values:
 ```yaml
@@ -360,6 +370,8 @@ run:
   bridgy init
   bridgy ssh (-t | --tmux) [-adsuvw] [-l LAYOUT] <host>...
   bridgy ssh [-duv] <host>
+  bridgy exec (-t | --tmux) [-adsuvw] [-l LAYOUT] <container>...
+  bridgy exec [-duv] <container>
   bridgy list-inventory
   bridgy list-mounts
   bridgy mount [-duv] <host>:<remotedir>
@@ -372,6 +384,7 @@ run:
 Sub-commands:
   init          create the ~/.bridgy/config.yml
   ssh           ssh into the selected host(s)
+  exec          exec into the selected container(s) (new relic + ecs only)
   mount         use sshfs to mount a remote directory to an empty local directory
   unmount       unmount one or more host sshfs mounts
   list-mounts   show all sshfs mounts
