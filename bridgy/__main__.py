@@ -318,7 +318,7 @@ def update_handler(args, config):
 
     logger.warn("Updating inventory...")
     inventory_obj = inventory.inventory(config, filter_sources=args['--source'])
-    inventory_obj.update()
+    inventory_obj.update(filter_sources=args['--source'])
 
 
 @utils.SupportedPlatforms('linux', 'windows', 'osx')

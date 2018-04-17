@@ -4,6 +4,7 @@ import sys
 import logging
 from functools import partial
 
+from bridgy.utils import memoize
 from bridgy.error import MissingBastionHost
 from bridgy.inventory.source import Bastion, Instance, InventorySet, InstanceType
 from bridgy.inventory.aws import AwsInventory
@@ -20,7 +21,7 @@ SOURCES = {
     'newrelic': NewRelicInventory,
 }
 
-
+@memoize
 def inventory(config, filter_sources=tuple()):
     inventorySet = InventorySet()
 
@@ -93,6 +94,7 @@ def instance_filter(instance, include_re=None, exclude_re=None):
     else:
         return True
 
+@memoize
 def instances(config, filter_sources=tuple()):
     include_re, exclude_re = None, None
     if config.dig('inventory', 'include_pattern'):
@@ -104,6 +106,7 @@ def instances(config, filter_sources=tuple()):
     config_instance_filter = partial(instance_filter, include_re=include_re, exclude_re=exclude_re)
     return list(filter(config_instance_filter, all_instances))
 
+@memoize
 def get_bastion(config, instance):
     bastion = None
 
@@ -147,5 +150,5 @@ def search(config, targets, filter_sources=tuple(), type=InstanceType.ALL):
     else:
         return [x for x in filtered_instances if x.type == type]
 
-def update(config):
-    inventory(config).update()
+def update(config, filter_sources=tuple()):
+    inventory(config).update(filter_sources=filter_sources)

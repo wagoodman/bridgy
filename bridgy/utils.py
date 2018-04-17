@@ -4,6 +4,7 @@ import sys
 import os
 import re
 
+from functools import wraps
 from blessings import Terminal
 
 term = Terminal()
@@ -38,6 +39,18 @@ class SupportedPlatforms(object):
 
         if normalized not in self.platforms:
             raise UnsupportedPlatform('Unsupported platform (%s)' % normalized)
+
+def memoize(fun):
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        key = (args, frozenset(sorted(kwargs.items())))
+        try:
+            return cache[key]
+        except KeyError:
+            ret = cache[key] = fun(*args, **kwargs)
+        return ret
+    cache = {}
+    return wrapper
 
 def shortUuid():
     return str(uuid.uuid4())[:8]
