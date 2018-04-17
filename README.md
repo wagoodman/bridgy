@@ -238,7 +238,6 @@ $ bridgy exec awesome
    o qa-myawesomecontainer
 ```
 
-
 ## Config Reference
 An exhaustive list of options you can put in the config, with some example values:
 ```yaml
