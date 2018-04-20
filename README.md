@@ -119,7 +119,7 @@ Have a special multi-pane tmux layout for every system you login to? Drop it in
 the config, reference it by name:
 ```yaml
 tmux:
-  layouts:
+  layout:
     logger:
       - cmd: split-window -h
       - cmd: split-window -h
@@ -394,7 +394,7 @@ Options:
   -a        --all            Automatically use all matched hosts.
   -d        --dry-run        Show all commands that you would have run, but don't run them (implies --verbose).
   -i SOURCE --source SOURCE  Search a subset of inventories by name (comma separated for multiple values)
-  -l LAYOUT --layout LAYOUT  Use a configured lmux layout for each host.
+  -l LAYOUT --layout LAYOUT  Use a configured tmux layout for each host.
   -s        --sync-panes     Synchronize input on all visible panes (tmux :setw synchronize-panes on).
   -t        --tmux           Open all ssh connections in a tmux session.
   -u        --update         pull the latest instance inventory from aws then run the specified command.
