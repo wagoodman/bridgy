@@ -175,6 +175,25 @@ bastion:
   options: -C -o ServerAliveInterval=255 -o FingerprintHash=sha256 -o TCPKeepAlive=yes -o ForwardAgent=yes -p 22222
 ```
 
+The same override functionality is available for ssh options and pattern matchers:
+```yaml
+inventory:
+  source:
+
+    - type: csv
+      name: on-site servers
+      include_pattern: .*meh_.*
+      file: anawesome.csv
+      fields: name, address
+      ssh:
+        user: a-better-username
+        options: -C -o ServerAliveInterval=60
+
+ssh:
+  user: some-username
+  options: -C -o ServerAliveInterval=255
+```
+
 Want to perform arbitrary tasks? Drop an ansible playbook in config, reference it by name (`grab-files`):
 ```yaml
 run:

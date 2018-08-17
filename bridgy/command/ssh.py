@@ -1,5 +1,5 @@
 from bridgy.error import *
-from bridgy.inventory import get_bastion
+from bridgy.inventory import get_bastion, get_ssh_options, get_ssh_user
 
 class Ssh(object):
 
@@ -15,8 +15,10 @@ class Ssh(object):
 
     @property
     def destination(self):
-        if self.config.dig('ssh', 'user'):
-            return '{user}@{host}'.format(user=self.config.dig('ssh', 'user'),
+        user = get_ssh_user(self.config, self.instance)
+        # self.config.dig('ssh', 'user')
+        if user:
+            return '{user}@{host}'.format(user=user,
                                           host=self.instance.address)
         else:
             return self.instance.address
@@ -33,7 +35,9 @@ class Ssh(object):
             bastion = template.format(options=bastionObj.options,
                                       destination=bastionObj.destination)
 
-        options = self.config.dig('ssh', 'options') or ''
+        options = get_ssh_options(self.config, self.instance)
+
+        # options = self.config.dig('ssh', 'options') or ''
 
         return '{} {} -t'.format(bastion, options)
 

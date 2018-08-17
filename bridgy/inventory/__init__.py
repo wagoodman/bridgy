@@ -131,6 +131,33 @@ def get_bastion(config, instance):
 
     return bastion
 
+
+@memoize
+def get_ssh_options(config, instance):
+    ssh_options = None
+
+    for inv in inventory(config).inventories:
+        if inv.name == instance.source and inv.ssh_options != None:
+            return inv.ssh_options
+
+    if config.dig('ssh', 'options'):
+        return config.dig('ssh', 'options')
+    
+    return ''
+
+@memoize
+def get_ssh_user(config, instance):
+    ssh_user = None
+
+    for inv in inventory(config).inventories:
+        if inv.name == instance.source and inv.ssh_user != None:
+            return inv.ssh_user
+
+    if config.dig('ssh', 'user'):
+        return config.dig('ssh', 'user')
+    
+    return ''
+
 def search(config, targets, filter_sources=tuple(), type=InstanceType.ALL):
     fuzzy = False
     if config.dig('inventory', 'fuzzy_search'):

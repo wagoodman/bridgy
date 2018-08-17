@@ -1,6 +1,8 @@
+import re
 import abc
 import warnings
 import collections
+from functools import partial
 
 from bridgy.error import MissingBastionHost
 
@@ -27,6 +29,10 @@ class InventorySource(object):
 
     name = "Invalid"
     bastion = None
+    ssh_user = None
+    ssh_options = None
+    include_pattern = None
+    exclude_pattern = None
 
     def __init__(self, *args, **kwargs):
         if 'name' in kwargs:
@@ -48,6 +54,49 @@ class InventorySource(object):
                 bastion_options = kwargs['bastion']['options']
 
             self.bastion = Bastion(destination=destination, options=bastion_options)
+
+        if 'ssh' in kwargs:
+            if 'user' in kwargs['ssh']:
+                self.ssh_user = kwargs['ssh']['user']
+
+            if 'options' in kwargs['ssh']:
+                self.ssh_options = kwargs['ssh']['options']
+            else:
+                self.ssh_options = ''
+        
+        if 'include_pattern' in kwargs:
+            self.include_pattern = kwargs['include_pattern']
+        if 'exclude_pattern' in kwargs:
+            self.exclude_pattern = kwargs['exclude_pattern']
+
+    def instance_filter(self, instance, include_re=None, exclude_re=None):
+        comparables = [instance.name, instance.address]
+
+        if instance.aliases:
+            comparables.extend(list(instance.aliases))
+
+        if include_re:
+            for name in comparables:
+                if include_re.search(name):
+                    return True
+            return False
+        elif exclude_re:
+            for name in comparables:
+                if exclude_re.search(name):
+                    return False
+            return True
+        else:
+            return True
+
+    def filter(self, all_instances):
+        include_re, exclude_re = None, None
+        if self.include_pattern:
+            include_re = re.compile(self.include_pattern)
+        if self.exclude_pattern:
+            exclude_re = re.compile(self.exclude_pattern)
+
+        config_instance_filter = partial(self.instance_filter, include_re=include_re, exclude_re=exclude_re)
+        return list(filter(config_instance_filter, all_instances))
 
     @abc.abstractmethod
     def update(self): pass

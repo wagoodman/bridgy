@@ -72,4 +72,4 @@ class NewRelicInventory(InventorySource):
 
                 instances.add(Instance(container_name, address, None, self.name, container_id, InstanceType.ECS))
 
-        return list(instances)
+        return self.filter(list(instances))

@@ -33,4 +33,4 @@ class CsvInventory(InventorySource):
         except IOError as ex:
             logger.error("Unable to read inventory: %s" % ex)
             sys.exit(1)
-        return list(instances)
+        return self.filter(list(instances))

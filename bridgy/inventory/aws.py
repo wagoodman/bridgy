@@ -88,7 +88,7 @@ class AwsInventory(InventorySource):
                     else:
                         instances.append(Instance(name, address, None, self.name, None, InstanceType.VM))
 
-        return instances
+        return self.filter(instances)
 
     def __ec2_search(self, tag=None, value=None, stub=True):
         filters = []
