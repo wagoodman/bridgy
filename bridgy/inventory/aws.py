@@ -3,9 +3,19 @@ import boto3
 import shutil
 import placebo
 import logging
+import warnings
 import itertools
+import collections
 
 from bridgy.inventory.source import InventorySource, Instance, InstanceType
+
+with warnings.catch_warnings():
+    # This warns about using the slow implementation of SequenceMatcher
+    # instead of the python-Levenshtein module, which requires compilation.
+    # I'd prefer for users tp simply use this tool without the need to
+    # compile since the search space is probably fairly small
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from fuzzywuzzy import fuzz
 
 logger = logging.getLogger()
 
@@ -53,16 +63,20 @@ class AwsInventory(InventorySource):
         self.ecsClient = session.client('ecs')
 
     def update(self):
+        # clear cache before updating
+        shutil.rmtree(self.cache_dir)
+        os.makedirs(self.cache_dir, mode=0o755)
         try:
-            self.__ecs_search(stub=False)
             self.__ec2_search(stub=False)
+            self.__ecs_search(stub=False)
         except KeyboardInterrupt:
             logger.error("Cancelled by user")
 
     def instances(self):
         instances = []
-        # instances.extend(self.ec2Instances())
-        instances.extend(self.ecsInstances())
+        ec2Instances = self.ec2Instances()
+        instances.extend(ec2Instances)
+        instances.extend(self.ecsInstances(ec2Instances))
         return instances
 
     def ec2Instances(self):
@@ -107,44 +121,90 @@ class AwsInventory(InventorySource):
 
         return instances
 
-    def ecsInstances(self):
-        data = self.__ecs_search(stub=True)
+    def ecsInstances(self, ec2Instances):
 
-        print(data)
+        def searchEc2Instances(target, partial=True, fuzzy=False):
+            matchedInstances = set()
 
-        return []
+            for instance in ec2Instances:
+                names = [instance.name]
+                if instance.aliases != None:
+                    names += list(instance.aliases)
+                for name in names:
+                    if target.lower() == name.lower():
+                        matchedInstances.add((100, instance))
+                    elif partial and target.lower() in name.lower():
+                        matchedInstances.add((99, instance))
+
+                    if fuzzy:
+                        score = fuzz.partial_ratio(target.lower(), name.lower())
+                        if score > 85 or target.lower() in name.lower():
+                            matchedInstances.add((score, instance))
+            
+            # it is possible for the same instance to be matched, if so, it should only
+            # appear on the return list once (still ordered by the most probable match)
+            return list(collections.OrderedDict([(v, None) for k, v in sorted(list(matchedInstances))]).keys())
+
+        # entrypoint...
+        instances = []
+        taskDescriptions, containerInstanceIds = self.__ecs_search(stub=True)
+
+        for taskArn, taskDescription in taskDescriptions.items():
+            containerInstanceArn = taskDescription['containerInstanceArn']
+            containerInstanceId = containerInstanceIds[containerInstanceArn]
+
+            if containerInstanceId == None:
+                continue
+            
+            containerInstance = searchEc2Instances(containerInstanceId)
+
+            if len(containerInstance) == 0:
+                continue
+
+            # add the associated service with the instance so it will match on a search
+            aliases = [taskDescription['group']]
+
+            instances.append(Instance(taskArn, containerInstance[0].address, tuple(aliases), self.name, None, InstanceType.ECS))
+
+        return instances
 
     def __ecs_search(self, value=None, stub=True):
 
         def fetchData():
-            allTasks = []
-            taskDescriptions = {}
+            taskDescriptions = {}  # { taskArn : { task-description... } }
+            containerInstanceIds = {}  # { containerInstanceArn : ecs-instance-id }
+
+            # obtain all tasks in all clusters
             clusters = self.ecsClient.list_clusters()
             for cluster in clusters['clusterArns']:
-                tasks = self.ecsClient.list_tasks(cluster=cluster)
-                allTasks.extend(tasks['taskArns'])
-                for taskArns in groupsOf(100, allTasks):
+                tasksResponse = self.ecsClient.list_tasks(cluster=cluster)
+                tasks = tasksResponse['taskArns']
+                for taskArns in groupsOf(100, tasks):
                     descriptions = self.ecsClient.describe_tasks(cluster=cluster, tasks=taskArns)
                     for taskDescription in descriptions['tasks']:
                         taskDescriptions[taskDescription['taskArn']] = taskDescription
 
-            for x in taskDescriptions.items():
-                print(x)
-            return allTasks
+                        # now we have a set of container instances to later look up
+                        if taskDescription['containerInstanceArn'] not in containerInstanceIds.keys():
+                            containerInstanceIds[taskDescription['containerInstanceArn']] = None
+
+            # find all container instances
+            for containerInstanceArns in groupsOf(100, containerInstanceIds.keys()):
+                descriptions = self.ecsClient.describe_container_instances(cluster=cluster, containerInstances=containerInstanceArns)
+                for containerInstanceDescription in descriptions['containerInstances']:
+                    instanceArn = containerInstanceDescription['containerInstanceArn']
+                    containerInstanceIds[instanceArn] = containerInstanceDescription['ec2InstanceId']
+
+            return taskDescriptions, containerInstanceIds
 
         if stub:
             self.pill.playback()
-            allTasks = fetchData()
+            taskDescriptions, containerInstanceIds = fetchData()
         else:
-            # clear cache before updating
-            shutil.rmtree(self.cache_dir)
-            os.makedirs(self.cache_dir, mode=0o755)
-
-            # update
             self.pill.record()
-            allTasks = fetchData()
+            taskDescriptions, containerInstanceIds = fetchData()
             self.pill.stop()
-        return allTasks
+        return taskDescriptions, containerInstanceIds
 
     def __ec2_search(self, tag=None, value=None, stub=True):
         filters = []
@@ -158,11 +218,6 @@ class AwsInventory(InventorySource):
             self.pill.playback()
             data = self.ec2Client.describe_instances(Filters=filters)
         else:
-            # clear cache before updating
-            shutil.rmtree(self.cache_dir)
-            os.makedirs(self.cache_dir, mode=0o755)
-
-            # update
             self.pill.record()
             data = self.ec2Client.describe_instances(Filters=filters)
             self.pill.stop()
