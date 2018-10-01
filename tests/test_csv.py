@@ -40,9 +40,9 @@ def test_csv_instances(mocker):
     csv_obj = CsvInventory('/tmp/dummy/path', ' name,address, random ', ' | ')
     instances = csv_obj.instances()
     print(instances)
-    expected_instances = [Instance(name='devenv-pubsrv', address='13.14.15.16', source='csv', container_id=None, type='VM'),
-                          Instance(name='testenv-pubsrv', address='1.2.3.4', source='csv', container_id=None, type='VM'),
-                          Instance(name='devenv-pubsrv', address='9.10.11.12', source='csv', container_id=None, type='VM'),
-                          Instance(name='testenv-pubsrv', address='5.6.7.8', source='csv', container_id=None, type='VM'),
-                          Instance(name='testenv-formsvc', address='17.18.19.20', source='csv', container_id=None, type='VM')]
+    expected_instances = [Instance(name='devenv-pubsrv', address='13.14.15.16', source='csv', type='VM'),
+                          Instance(name='testenv-pubsrv', address='1.2.3.4', source='csv', type='VM'),
+                          Instance(name='devenv-pubsrv', address='9.10.11.12', source='csv', type='VM'),
+                          Instance(name='testenv-pubsrv', address='5.6.7.8', source='csv', type='VM'),
+                          Instance(name='testenv-formsvc', address='17.18.19.20', source='csv', type='VM')]
     assert set(instances) == set(expected_instances)

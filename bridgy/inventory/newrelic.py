@@ -61,15 +61,15 @@ class NewRelicInventory(InventorySource):
                 address = event_dict['ipV4Address'].strip().split("/")[0]
                 if hostname is None:
                     hostname = address
-                instances.add(Instance(hostname, address, None, self.name, None, InstanceType.VM))
+                instances.add(Instance(hostname, address, None, self.name, InstanceType.VM))
 
         for results_dict in data[InstanceType.ECS]['results']:
             for event_dict in results_dict['events']:
                 container_name = event_dict['containerName']
-                container_id = event_dict['containerId']
+                # container_id = event_dict['containerId']
                 hostname = event_dict['hostname']
                 address = parseIpFromHostname(hostname)
 
-                instances.add(Instance(container_name, address, None, self.name, container_id, InstanceType.ECS))
+                instances.add(Instance(container_name, address, None, self.name, InstanceType.ECS))
 
         return list(instances)

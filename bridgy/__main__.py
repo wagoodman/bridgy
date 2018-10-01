@@ -167,14 +167,17 @@ def exec_handler(args, config):
         sys.exit(1)
 
     for instance in targets:
-        if instance.container_id == None:
-            logger.info("Could not find container id for instance: %s" % instance)
+        if instance.type != InstanceType.ECS:
+            logger.info("Cannot exec to a non-container instance: %s" % instance)
             sys.exit(1)
 
     commands = collections.OrderedDict()
     for idx, instance in enumerate(targets):
         name = '{}-{}'.format(instance.name, idx)
-        commands[name] = Ssh(config, instance, command="sudo -i docker exec -ti %s bash" % instance.container_id).command
+        taskArn = instance.name
+        cmd = """ \\" curl -s http://localhost:51678/v1/tasks?taskarn=%s | grep -Po '\\"DockerId":.*?[^\\\\]\\"' | grep -Po '[^\\"]+' | tail -n 1 | xargs -I . bash -c '</dev/tty docker exec -ti . bash' \\" """ % taskArn
+        commands[name] = Ssh(config, instance, command=cmd).command
+        print(commands[name])
 
     layout = None
     if args['--layout']:

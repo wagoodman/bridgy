@@ -85,7 +85,7 @@ class AwsInventory(InventorySource):
         instances = []
         for reservation in data['Reservations']:
             for instance in reservation['Instances']:
-
+                instanceId = None
                 # try to find the best dns/ip address to reach this box
                 address = None
                 if instance.get('PublicDnsName'):
@@ -107,7 +107,8 @@ class AwsInventory(InventorySource):
                 if instance['PrivateDnsName']:
                     aliases.append(instance['PrivateDnsName'])
                 if instance['InstanceId']:
-                    aliases.append(instance['InstanceId'])
+                    instanceId = instance['InstanceId']
+                    aliases.append(instanceId)
 
                 aliases[:] = [x for x in aliases if x != None]
                 name = aliases.pop(0)
@@ -115,39 +116,21 @@ class AwsInventory(InventorySource):
                 # take note of this instance
                 if name != None and address != None:
                     if len(aliases) > 0:
-                        instances.append(Instance(name, address, tuple(aliases), self.name, None, InstanceType.VM))
+                        instances.append(Instance(name, address, tuple(aliases), self.name, InstanceType.VM, instanceId))
                     else:
-                        instances.append(Instance(name, address, None, self.name, None, InstanceType.VM))
+                        instances.append(Instance(name, address, None, self.name, InstanceType.VM, instanceId))
 
         return instances
 
     def ecsInstances(self, ec2Instances):
-
-        def searchEc2Instances(target, partial=True, fuzzy=False):
-            matchedInstances = set()
-
-            for instance in ec2Instances:
-                names = [instance.name]
-                if instance.aliases != None:
-                    names += list(instance.aliases)
-                for name in names:
-                    if target.lower() == name.lower():
-                        matchedInstances.add((100, instance))
-                    elif partial and target.lower() in name.lower():
-                        matchedInstances.add((99, instance))
-
-                    if fuzzy:
-                        score = fuzz.partial_ratio(target.lower(), name.lower())
-                        if score > 85 or target.lower() in name.lower():
-                            matchedInstances.add((score, instance))
-            
-            # it is possible for the same instance to be matched, if so, it should only
-            # appear on the return list once (still ordered by the most probable match)
-            return list(collections.OrderedDict([(v, None) for k, v in sorted(list(matchedInstances))]).keys())
-
-        # entrypoint...
         instances = []
         taskDescriptions, containerInstanceIds = self.__ecs_search(stub=True)
+
+        # since we always search by instanceId, build a fast lookup
+        instanceIdLookup = {}
+        for instance in ec2Instances:
+            if instance.instanceId != None:
+                instanceIdLookup[instance.instanceId] = instance
 
         for taskArn, taskDescription in taskDescriptions.items():
             containerInstanceArn = taskDescription['containerInstanceArn']
@@ -156,20 +139,18 @@ class AwsInventory(InventorySource):
             if containerInstanceId == None:
                 continue
             
-            containerInstance = searchEc2Instances(containerInstanceId)
-
-            if len(containerInstance) == 0:
+            if containerInstanceId not in instanceIdLookup:
                 continue
+
+            containerInstance = instanceIdLookup[containerInstanceId]
 
             # add the associated service with the instance so it will match on a search
             aliases = [taskDescription['group']]
-
-            instances.append(Instance(taskArn, containerInstance[0].address, tuple(aliases), self.name, None, InstanceType.ECS))
+            instances.append(Instance(taskArn, containerInstance.address, tuple(aliases), self.name, InstanceType.ECS, None, taskArn))
 
         return instances
 
     def __ecs_search(self, value=None, stub=True):
-
         def fetchData():
             taskDescriptions = {}  # { taskArn : { task-description... } }
             containerInstanceIds = {}  # { containerInstanceArn : ecs-instance-id }
