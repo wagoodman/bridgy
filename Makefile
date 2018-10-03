@@ -40,7 +40,7 @@ bootstrap2: venv2
 	make clean
 
 venv2:
-	virtualenv -p python2 venv2
+	virtualenv -p python venv2
 	venv2/bin/pip install --upgrade pip
 	venv2/bin/pip install --upgrade setuptools
 

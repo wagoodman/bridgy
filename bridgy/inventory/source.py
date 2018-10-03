@@ -7,7 +7,7 @@ from functools import partial
 from bridgy.error import MissingBastionHost
 
 with warnings.catch_warnings():
-    # Thiw warns about using the slow implementation of SequenceMatcher
+    # This warns about using the slow implementation of SequenceMatcher
     # instead of the python-Levenshtein module, which requires compilation.
     # I'd prefer for users tp simply use this tool without the need to
     # compile since the search space is probably fairly small
@@ -20,7 +20,7 @@ class InstanceType:
     ECS = 'ECS'
 
 Bastion = collections.namedtuple("Bastion", "destination options")
-Instance = collections.namedtuple("Instance", "name address aliases source container_id type")
+Instance = collections.namedtuple("Instance", "name address aliases source type instanceId taskArn")
 # allow there to be optional kwargs that default to None
 Instance.__new__.__defaults__ = (None,) * len(Instance._fields)
 
