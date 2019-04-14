@@ -33,17 +33,6 @@ venv3:
 	venv3/bin/pip install --upgrade pip
 	venv3/bin/pip install --upgrade setuptools
 
-bootstrap2: venv2
-	. venv2/bin/activate
-	venv2/bin/pip install -e .
-	venv2/bin/pip install --upgrade tox
-	make clean
-
-venv2:
-	virtualenv -p python2 venv2
-	venv2/bin/pip install --upgrade pip
-	venv2/bin/pip install --upgrade setuptools
-
 clean:
 	rm -f MANIFEST
 	rm -rf build dist
