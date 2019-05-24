@@ -69,7 +69,7 @@ class ConfigBase(object):
                              Representer.represent_str)
         try:
             with open(os.path.expanduser(self.path), 'r') as fh:
-                self.conf = yaml.load(fh)
+                self.conf = yaml.load(fh, Loader=yaml.SafeLoader)
         except Exception as ex:
             logger.error("Unable to read config (%s): %s" % (self.path, ex))
             sys.exit(1)
