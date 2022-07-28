@@ -16,7 +16,7 @@ def _readConfig():
                          Representer.represent_str)
     try:
         with open(os.path.expanduser(ConfigBase.path), 'r') as fh:
-            config = yaml.load(fh)
+            config = yaml.load(fh, Loader=yaml.FullLoader)
     except Exception as ex:
         logger.error("Unable to read config (%s): %s" % (ConfigBase.path, ex))
         sys.exit(1)
