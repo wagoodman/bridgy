@@ -44,7 +44,7 @@ class Ssh(object):
 
     @property
     def command(self):
-        cmd = 'ssh {options} {destination} {command}'
+        cmd = "'ssh {options} {destination} {command}'"
         return cmd.format(destination=self.destination,
                           options=self.options,
                           command=self.custom_command)
