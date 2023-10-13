@@ -71,15 +71,15 @@ class AwsInventory(InventorySource):
                         else:
                             aliases.append(tagDict['Value'])
 
-                if instance['PublicDnsName']:
-                    aliases.append(instance['PublicDnsName'])
-                if instance['PrivateDnsName']:
-                    aliases.append(instance['PrivateDnsName'])
+                # if instance['PublicDnsName']:
+                #     aliases.append(instance['PublicDnsName'])
+                # if instance['PrivateDnsName']:
+                #     aliases.append(instance['PrivateDnsName'])
                 if instance['InstanceId']:
                     aliases.append(instance['InstanceId'])
 
                 aliases[:] = [x for x in aliases if x != None]
-                name = aliases.pop(0)
+                name = aliases.pop(0) + " " +  instance['InstanceId']
 
                 # take note of this instance
                 if name != None and address != None:
